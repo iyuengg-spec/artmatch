@@ -1,0 +1,38 @@
+name: 每日岗位数据更新
+
+on:
+  schedule:
+    # 北京时间 15:00 = UTC 07:00
+    - cron: '0 7 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update-jobs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 生成最新岗位数据
+        run: python gen_jobs.py
+
+      - name: 提交更新
+        run: |
+          git config user.name "ArtMatch Bot"
+          git config user.email "bot@artmatch.app"
+          git add jobs-data.json
+          # 仅在有变更时提交
+          if git diff --cached --quiet; then
+            echo "数据无变化，跳过提交"
+          else
+            git commit -m "📊 每日岗位数据自动更新 $(date '+%Y-%m-%d')"
+            git push
+          fi
