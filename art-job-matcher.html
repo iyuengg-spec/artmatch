@@ -772,44 +772,6 @@
                                 <option value="">请选择城市</option>
                             </select>
                         </div>
-                        <div class="f-group">
-                            <label>工作年限</label>
-                            <select class="f-select" id="profExp">
-                                <option value="">请选择</option>
-                                <option>应届生</option><option>1年以内</option><option>1-3年</option>
-                                <option>3-5年</option><option>5年以上</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:20px;">
-                        <div class="f-grid">
-                            <div class="f-group">
-                                <label>软件技能</label>
-                                <span class="f-hint">输入技能名称后按回车添加</span>
-                                <div class="tags-box" id="skillBox">
-                                    <input class="tag-in" id="skillInput" placeholder="如：Photoshop、Blender、Figma..." autocomplete="off">
-                                </div>
-                                <div class="quick-skills">
-                                    常用推荐：
-                                    <a onclick="addQuickSkill('PS')">PS</a> ·
-                                    <a onclick="addQuickSkill('AI')">AI</a> ·
-                                    <a onclick="addQuickSkill('Figma')">Figma</a> ·
-                                    <a onclick="addQuickSkill('Blender')">Blender</a> ·
-                                    <a onclick="addQuickSkill('C4D')">C4D</a> ·
-                                    <a onclick="addQuickSkill('AE')">AE</a> ·
-                                    <a onclick="addQuickSkill('PR')">PR</a> ·
-                                    <a onclick="addQuickSkill('Sketch')">Sketch</a>
-                                </div>
-                            </div>
-                            <div class="f-group">
-                                <label>硬件/手工技能</label>
-                                <span class="f-hint">输入技能后按回车添加</span>
-                                <div class="tags-box" id="hwBox">
-                                    <input class="tag-in" id="hwInput" placeholder="如：手绘、陶艺、摄影、版画..." autocomplete="off">
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div style="margin-top:20px;">
@@ -839,18 +801,6 @@
                                 <label>请输入求职方向具体名称 <span class="req">*</span></label>
                                 <input class="f-input" id="profDirCustom" placeholder="请输入您期望的具体岗位方向" onchange="saveProfile()" oninput="saveProfileDebounced()" autocomplete="off">
                             </div>
-                            <div class="f-group">
-                                <label>作品集链接</label>
-                                <input class="f-input" id="profPortfolio" placeholder="如：https://zcool.com.cn/xxx 或 Behance链接" autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:20px;">
-                        <div class="f-group">
-                            <label>项目经历描述</label>
-                            <span class="f-hint">描述1-3个重要项目，包括项目名称、你的角色、使用的技术/工具、成果</span>
-                            <textarea class="f-textarea" id="profProjects" rows="4" placeholder="示例：&#10;1. 「城市记忆」品牌VI设计 - 主设计师 - 独立完成logo、字体、应用延展设计 - 使用AI+PS - 获学院优秀毕业设计&#10;2. 某电商APP界面改版 - UI设计师 - 负责首页和详情页重设计 - 使用Figma+Principle - 上线后转化率提升15%"></textarea>
                         </div>
                     </div>
 
@@ -1174,9 +1124,7 @@
         const profile = {
             name: '', majorCat: '', majorSub: '', majorCustom: '', major: '',
             education: '', school: '', city: '',
-            experience: '', skills: [], hardwareSkills: [],
-            dirCat: '', dirSub: '', dirCustom: '', jobDirection: '',
-            portfolio: '', projects: ''
+            dirCat: '', dirSub: '', dirCustom: '', jobDirection: ''
         };
 
         // ===== MAJOR CATEGORIES DATA =====
@@ -1763,23 +1711,11 @@
         }
 
         function addQuickSkill(s) {
-            if (!profile.skills.includes(s)) {
-                profile.skills.push(s);
-                createTag(s, 'skillBox');
-                document.getElementById('skillInput').value = '';
-                saveProfile();
-            }
+            // No longer applicable: skill box removed
         }
 
         function syncProfile() {
-            profile.skills = [];
-            profile.hardwareSkills = [];
-            document.querySelectorAll('#skillBox .tag').forEach(t => {
-                profile.skills.push(t.childNodes[0].textContent.trim());
-            });
-            document.querySelectorAll('#hwBox .tag').forEach(t => {
-                profile.hardwareSkills.push(t.childNodes[0].textContent.trim());
-            });
+            // Skills/hardware skills fields removed - kept for compatibility
         }
 
         // ===== MATCH LOGIC (PERSONALIZED) =====
@@ -1850,52 +1786,22 @@
         function calculateMatch(job) {
             let score = 0;
             const adv = [], gaps = [], mSkills = [], xSkills = [];
-            const allPS = [...profile.skills, ...profile.hardwareSkills].map(s => s.toLowerCase());
-            const allReq = [...job.reqSkills].map(s => s.toLowerCase());
-            const allPref = [...(job.prefSkills || [])].map(s => s.toLowerCase());
 
-            // ===== 1. DIRECTION MATCH (30%) — PRIMARY PERSONALIZATION =====
+            // ===== 1. DIRECTION MATCH (50%) — PRIMARY PERSONALIZATION =====
             const dirScore = calculateDirectionScore(profile.jobDirection, job);
-            score += Math.round(dirScore * 0.30);
+            score += Math.round(dirScore * 0.50);
             if (dirScore >= 90) adv.push('🎯 求职方向高度匹配');
             else if (dirScore >= 65) adv.push('✅ 求职方向相关');
             else if (dirScore >= 40) adv.push('📎 同类别岗位');
             else if (dirScore < 20 && profile.jobDirection) gaps.push('⚠ 岗位方向与您的求职目标差异较大');
 
-            // ===== 2. SKILLS MATCH (20%) =====
-            allReq.forEach(s => {
-                const found = allPS.some(ps => ps.includes(s) || s.includes(ps));
-                if (found) mSkills.push(s); else xSkills.push(s);
-            });
-            allPref.forEach(s => {
-                if (allPS.some(ps => ps.includes(s) || s.includes(ps))) mSkills.push(s);
-            });
-            const reqRate = allReq.length > 0 ? mSkills.filter(s => allReq.includes(s)).length / allReq.length : 0;
-            score += Math.round(reqRate * 20);
-            if (reqRate >= 0.8) adv.push('核心技能高度匹配');
-            else if (reqRate >= 0.5) adv.push('部分核心技能匹配');
-            if (xSkills.length > 0) gaps.push('建议补充：' + xSkills.slice(0,3).join('、'));
-
-            // ===== 3. MAJOR RELEVANCE (20%) =====
+            // ===== 2. MAJOR RELEVANCE (30%) =====
             const majorRel = job.reqMajor.some(m => profile.major && (profile.major.includes(m) || m.includes(profile.major))) ? 100 : (profile.major ? 30 : 0);
-            score += Math.round(majorRel * 0.20);
+            score += Math.round(majorRel * 0.30);
             if (majorRel >= 80) adv.push('专业背景匹配');
             else if (profile.major && majorRel < 50) gaps.push('专业方向与岗位要求不完全匹配');
 
-            // ===== 4. EXPERIENCE (15%) =====
-            const expLevels = ['应届生','1年以内','1-3年','3-5年','5年以上'];
-            const pIdx = expLevels.indexOf(profile.experience);
-            const jIdx = expLevels.indexOf(job.expLevel);
-            let expMatch = 50;
-            if (pIdx >= 0 && jIdx >= 0) {
-                const diff = Math.abs(pIdx - jIdx);
-                expMatch = diff === 0 ? 100 : diff === 1 ? 70 : diff === 2 ? 40 : 20;
-            }
-            score += Math.round(expMatch * 0.15);
-            if (expMatch >= 80) adv.push('经验级别匹配');
-            else if (expMatch < 50) gaps.push('工作经验与岗位要求有差距');
-
-            // ===== 5. CITY/LOCATION MATCH (10%) =====
+            // ===== 3. CITY/LOCATION MATCH (20%) =====
             const userCity = (profile.city || '').trim();
             const jobCity = (job.city || '').trim();
             let cityScore = 0;
@@ -1903,7 +1809,6 @@
                 if (jobCity === userCity || jobCity === '全国') { cityScore = 100; adv.push('📍 期望城市'); }
                 else if (jobCity === '全国') { cityScore = 70; }
                 else {
-                    // Province-level fuzzy matching via city prefix
                     const userPref = userCity.substring(0, 2);
                     const jobPref = jobCity.substring(0, 2);
                     if (userPref === jobPref && userPref.length === 2) { cityScore = 60; adv.push('📍 同省城市'); }
@@ -1912,21 +1817,15 @@
             } else if (jobCity === '全国') {
                 cityScore = 70;
             } else { cityScore = 40; }
-            score += Math.round(cityScore * 0.10);
-
-            // ===== 6. PORTFOLIO & PROJECTS (5%) =====
-            if (profile.portfolio) { score += 3; adv.push('有作品集链接'); }
-            else gaps.push('建议补充作品集链接');
-            if (profile.projects && profile.projects.trim().length > 30) { score += 2; adv.push('有项目经历描述'); }
-            else gaps.push('建议补充项目经历');
+            score += Math.round(cityScore * 0.20);
 
             score = Math.min(100, Math.max(5, Math.round(score)));
-            return { ...job, score, advantages: adv, gaps, matchedSkills: mSkills, missingSkills: xSkills, majorRelevance: majorRel, experienceMatch: expMatch, directionScore: dirScore, cityScore };
+            return { ...job, score, advantages: adv, gaps, matchedSkills: mSkills, missingSkills: xSkills, majorRelevance: majorRel, directionScore: dirScore, cityScore };
         }
 
         function refreshMatches() {
             syncProfile();
-            if (!profile.major && profile.skills.length === 0 && !profile.jobDirection) {
+            if (!profile.major && !profile.jobDirection) {
                 state.matchResults = [];
                 state.displayedResults = [];
                 state.page = 0;
@@ -2504,12 +2403,12 @@
 
             setTimeout(() => {
                 const jdKeywords = extractKeywords(jd);
-                const allPS = [...profile.skills, ...profile.hardwareSkills].map(s => s.toLowerCase());
+                const allPS = [];  // skills fields removed
 
                 // 如果上传了简历，从简历中提取额外技能关键词
                 const resumeKeywords = hasResume ? extractKeywords(resumeExtra) : [];
                 const resumeLower = hasResume ? resumeExtra.toLowerCase() : '';
-                const allWithResume = [...new Set([...allPS, ...resumeKeywords.map(k=>k.toLowerCase())])];
+                const allWithResume = [...new Set([...resumeKeywords.map(k=>k.toLowerCase())])];
 
                 const matched = jdKeywords.filter(kw => allWithResume.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps)));
                 const missed = jdKeywords.filter(kw => !allWithResume.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps)));
@@ -2517,8 +2416,8 @@
                     resumeLower.includes(kw.toLowerCase()) && !allPS.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps))
                 ) : [];
 
-                const overall = Math.min(98, Math.max(10, allPS.length > 0 || hasResume
-                    ? Math.round((matched.length/Math.max(1,jdKeywords.length))*60 + (profile.major?20:0) + (profile.projects||hasResume?10:0) + (profile.portfolio?10:0))
+                const overall = Math.min(98, Math.max(10, hasResume
+                    ? Math.round((matched.length/Math.max(1,jdKeywords.length))*60 + (profile.major?40:0))
                     : 30));
 
                 const tips = [];
@@ -2664,12 +2563,11 @@
 
                 if (missed.length > 0) skillPath.push('短期（1-2周）：快速上手 ' + missed.slice(0,2).join('、') + ' 基础操作，通过B站/教程网学习核心功能。');
                 skillPath.push('中期（1-3月）：完成2-3个与目标岗位相关的实战项目，积累作品集素材。');
-                skillPath.push('长期：持续关注行业趋势，参加设计比赛或开源项目，建立个人品牌影响力。');
-                if (!profile.portfolio) skillPath.push('本周目标：注册站酷或Behance账号，上传至少3个作品。');
+                skillPath.push('长期：持续关注行业趋势，参加专业比赛或开源项目，建立个人品牌影响力。');
 
-                let summary = overall >= 80 ? '🎉 背景与JD匹配度较高，重点优化作品集呈现和项目包装即可大幅提升通过率。'
-                    : overall >= 50 ? '📈 有一定匹配基础，需要针对性地补充技能和优化简历内容。'
-                    : '🔧 匹配度偏低，建议优先提升核心技能，同时通过项目包装和作品集优化来弥补差距。';
+                let summary = overall >= 80 ? '🎉 背景与JD匹配度较高，建议针对性优化简历呈现。'
+                    : overall >= 50 ? '📈 有一定匹配基础，需要针对性地优化简历内容。'
+                    : '🔧 匹配度偏低，建议优先补充相关经历，优化简历内容来弥补差距。';
 
                 const html = `
                     <div class="opt-sec">
@@ -2802,15 +2700,10 @@
                 education: document.getElementById('profEdu').value,
                 school: document.getElementById('profSchool').value,
                 city: document.getElementById('profCity').value,
-                experience: document.getElementById('profExp').value,
-                skills: profile.skills,
-                hardwareSkills: profile.hardwareSkills,
                 dirCat: document.getElementById('profDirCat').value,
                 dirSub: document.getElementById('profDirSub') ? document.getElementById('profDirSub').value : '',
                 dirCustom: document.getElementById('profDirCustom') ? document.getElementById('profDirCustom').value : '',
-                jobDirection: profile.jobDirection,
-                portfolio: document.getElementById('profPortfolio').value,
-                projects: document.getElementById('profProjects').value
+                jobDirection: profile.jobDirection
             };
             Object.assign(profile, data);
             localStorage.setItem('artmatch_profile', JSON.stringify(data));
@@ -2850,11 +2743,8 @@
             document.getElementById('profEdu').value = data.education || '';
             document.getElementById('profSchool').value = data.school || '';
             document.getElementById('profCity').value = data.city || '';
-            document.getElementById('profExp').value = data.experience || '';
             // Direction fields
             document.getElementById('profDirCat').value = data.dirCat || '';
-            document.getElementById('profPortfolio').value = data.portfolio || '';
-            document.getElementById('profProjects').value = data.projects || '';
 
             // Trigger major cascade
             if (data.majorCat) {
@@ -2883,20 +2773,12 @@
                 }, 50);
             }
 
-            // Restore tags
-            var skillBox = document.getElementById('skillBox');
-            var hwBox = document.getElementById('hwBox');
-            if (skillBox) skillBox.querySelectorAll('.tag').forEach(function(t) { t.remove(); });
-            if (hwBox) hwBox.querySelectorAll('.tag').forEach(function(t) { t.remove(); });
-            (data.skills||[]).forEach(function(s) { createTag(s, 'skillBox'); });
-            (data.hardwareSkills||[]).forEach(function(s) { createTag(s, 'hwBox'); });
-
             const saveEl = document.getElementById('saveStatus');
             if (saveEl) saveEl.textContent = '已加载';
         }
 
         function resetAll() {
-            ['profName','profMajorCat','profEdu','profSchool','profCity','profExp','profDir','profPortfolio','profProjects'].forEach(id => {
+            ['profName','profMajorCat','profEdu','profSchool','profCity','profDir'].forEach(id => {
                 var el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -2906,8 +2788,6 @@
             // Reset cascade UI
             document.getElementById('majorSubGroup').style.display = 'block';
             document.getElementById('majorCustomGroup').style.display = 'none';
-            document.getElementById('skillBox').querySelectorAll('.tag').forEach(t => t.remove());
-            document.getElementById('hwBox').querySelectorAll('.tag').forEach(t => t.remove());
             Object.keys(profile).forEach(k => {
                 profile[k] = Array.isArray(profile[k]) ? [] : '';
             });
@@ -2924,7 +2804,7 @@
 
         // Auto-save on input change
         function setupAutoSave() {
-            const ids = ['profName','profMajorCat','profMajorSub','profMajorCustom','profEdu','profSchool','profCity','profExp','profDir','profPortfolio','profProjects'];
+            const ids = ['profName','profMajorCat','profMajorSub','profMajorCustom','profEdu','profSchool','profCity','profDir'];
             ids.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -3139,8 +3019,6 @@
         }
 
         function init() {
-            setupTagInput('skillInput', 'skillBox', profile.skills);
-            setupTagInput('hwInput', 'hwBox', profile.hardwareSkills);
             setupAutoSave();
             populateCitySelect();
             loadProfile();
@@ -3149,7 +3027,7 @@
             renderAll();
             // Load external jobs async
             loadJobsData().then(() => {
-                if (profile.major || profile.skills.length > 0) {
+                if (profile.major) {
                     refreshMatches();
                 }
             });
