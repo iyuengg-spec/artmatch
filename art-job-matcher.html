@@ -1,0 +1,3105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtMatch - 艺术类学生AI求职智能匹配</title>
+    <style>
+        :root {
+            --primary: #6C5CE7;
+            --primary2: #8B7CF7;
+            --secondary: #A29BFE;
+            --accent: #FD79A8;
+            --accent2: #FF9FBF;
+            --bg: #F5F3FF;
+            --surface: #FFFFFF;
+            --text: #1E1B3A;
+            --text2: #6B668C;
+            --text3: #A8A3C8;
+            --success: #00B894;
+            --warning: #FDCB6E;
+            --danger: #E17055;
+            --gradient: linear-gradient(135deg, #6C5CE7 0%, #8B7CF7 40%, #FD79A8 100%);
+            --gradient2: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 50%, #FD79A8 100%);
+            --shadow-sm: 0 2px 8px rgba(108,92,231,0.06);
+            --shadow: 0 4px 24px rgba(108,92,231,0.08);
+            --shadow-lg: 0 12px 40px rgba(108,92,231,0.12);
+            --shadow-glow: 0 0 30px rgba(108,92,231,0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar{width:6px;height:6px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:#D5D0F0;border-radius:3px;}
+        ::-webkit-scrollbar-thumb:hover{background:#B5AEE0;}
+        
+        body{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Animated background pattern */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(108,92,231,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 85% 60%, rgba(253,121,168,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(0,184,148,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 30% 50%, rgba(162,155,254,0.05) 0%, transparent 40%);
+            animation: bgShift 20s ease-in-out infinite;
+        }
+        @keyframes bgShift {
+            0%,100%{opacity:1;}
+            50%{opacity:0.6;}
+        }
+        
+        /* Floating decorations */
+        .bg-decorations {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .bg-dot {
+            position: absolute; border-radius: 50%; filter: blur(0px);
+            animation: floatUp 8s ease-in-out infinite;
+        }
+        .bg-dot:nth-child(1){width:120px;height:120px;top:15%;left:5%;background:radial-gradient(circle,rgba(108,92,231,0.08),transparent 70%);animation-delay:0s;}
+        .bg-dot:nth-child(2){width:80px;height:80px;top:60%;right:8%;background:radial-gradient(circle,rgba(253,121,168,0.08),transparent 70%);animation-delay:-3s;}
+        .bg-dot:nth-child(3){width:150px;height:150px;top:40%;left:45%;background:radial-gradient(circle,rgba(162,155,254,0.06),transparent 70%);animation-delay:-6s;}
+        .bg-dot:nth-child(4){width:100px;height:100px;top:80%;left:20%;background:radial-gradient(circle,rgba(0,184,148,0.06),transparent 70%);animation-delay:-2s;}
+        .bg-dot:nth-child(5){width:60px;height:60px;top:10%;right:30%;background:radial-gradient(circle,rgba(253,121,168,0.07),transparent 70%);animation-delay:-5s;}
+        @keyframes floatUp {
+            0%,100%{transform:translateY(0) scale(1);}
+            50%{transform:translateY(-30px) scale(1.08);}
+        }
+
+        /* Header - glass morphism */
+        .app-header{
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(108,92,231,0.08); padding: 0 32px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 20px rgba(108,92,231,0.06);
+        }
+        .header-brand{
+            display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+            background: var(--gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-brand .logo{
+            width: 38px; height: 38px; background: var(--gradient); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px; -webkit-text-fill-color: white;
+            box-shadow: 0 4px 15px rgba(108,92,231,0.3);
+        }
+        .header-stats{display:flex;gap:24px;font-size:13px;color:var(--text2);}
+        .header-stats span{display:flex;align-items:center;gap:6px;}
+        .header-stats strong{color:var(--primary);font-weight:600;}
+        .update-badge{
+            display:inline-flex;align-items:center;gap:6px;padding:5px 14px;
+            background:linear-gradient(135deg,#E6FFF8,#D5F5E3);border-radius:50px;
+            font-size:12px;font-weight:600;color:#00B894;white-space:nowrap;
+            animation:pulse-badge 2s ease-in-out infinite; box-shadow: 0 2px 8px rgba(0,184,148,0.15);
+        }
+        @keyframes pulse-badge{0%,100%{box-shadow:0 0 0 0 rgba(0,184,148,0.3);}50%{box-shadow:0 0 0 8px rgba(0,184,148,0);}}
+
+        /* Layout */
+        .container{max-width:1280px;margin:0 auto;padding:32px 32px 80px;position:relative;z-index:1;}
+
+        /* Hero */
+        .hero{text-align:center;padding:40px 0 24px;position:relative;}
+        .hero h1{
+            font-size: 38px; font-weight: 900; letter-spacing: -1px;
+            background: var(--gradient); -webkit-background-clip: text; background-clip: text; 
+            -webkit-text-fill-color: transparent; margin-bottom: 12px;
+            animation: heroFadeIn .8s ease-out;
+        }
+        @keyframes heroFadeIn {
+            from{opacity:0;transform:translateY(10px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+        .hero p{color:var(--text2);font-size:16px;max-width:600px;margin:0 auto;line-height:1.7;}
+        .update-hero-banner{
+            display:flex;align-items:center;gap:16px;max-width:640px;margin:20px auto 0;
+            padding:16px 22px;background:linear-gradient(135deg,#E6FFF8,#D5F5E3);
+            border:1.5px solid rgba(0,184,148,0.15);border-radius:var(--radius-sm);
+            backdrop-filter: blur(10px);animation:heroFadeIn 1s ease-out;
+        }
+        .update-hero-icon{
+            width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#00B894,#00CEC9);
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            flex-shrink:0;box-shadow:0 4px 16px rgba(0,184,148,0.3);
+        }
+        .update-hero-text{flex:1;display:flex;flex-direction:column;gap:2px;}
+        .update-hero-text strong{font-size:15px;color:#00B894;}
+        .update-hero-text span{font-size:13px;color:var(--text2);}
+        .update-hero-text em{font-style:normal;font-weight:700;color:var(--primary);}
+        .update-hero-time{
+            font-size:12px;font-weight:600;color:white;
+            background:linear-gradient(135deg,#00B894,#00CEC9);
+            padding:6px 16px;border-radius:50px;white-space:nowrap;flex-shrink:0;
+            box-shadow: 0 2px 8px rgba(0,184,148,0.25);
+        }
+
+        /* Steps */
+        .steps{
+            display:flex;align-items:center;justify-content:center;margin-bottom:36px;flex-wrap:wrap;
+        }
+        .step{
+            display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:50px;
+            font-size:14px;font-weight:500;color:var(--text2);background:var(--surface);
+            border:2px solid transparent;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);white-space:nowrap;
+            box-shadow: var(--shadow-sm);
+        }
+        .step:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,92,231,0.1);}
+        .step.active{color:var(--primary);border-color:var(--primary);background:rgba(108,92,231,0.04);font-weight:600;box-shadow:0 4px 20px rgba(108,92,231,0.12);}
+        .step.done{color:var(--success);border-color:var(--success);background:rgba(0,184,148,0.03);}
+        .step-num{
+            width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+            font-size:13px;font-weight:700;background:#F0EDFF;color:var(--text2);transition:all .35s;
+        }
+        .step.active .step-num{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(108,92,231,0.3);}
+        .step.done .step-num{background:var(--success);color:white;}
+        .step.locked{cursor:not-allowed;opacity:0.55;}
+        .step.locked .step-num{background:#E8E5F5;color:#B2BEC3;}
+        .step-line{width:40px;height:2px;background:linear-gradient(90deg,#E8E5F5,#E8E5F5);margin:0 -4px;border-radius:2px;transition:all .5s;}
+        .step-line.done{background:linear-gradient(90deg,var(--success),rgba(0,184,148,0.4));}
+
+        /* Card */
+        .card{
+            background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+            padding:32px;margin-bottom:24px;border:1px solid rgba(108,92,231,0.06);
+            transition:all .4s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;
+        }
+        .card::after{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
+            background:var(--gradient);opacity:0;transition:opacity .4s;
+        }
+        .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+        .card:hover::after{opacity:1;}
+        .card-title{
+            display:flex;align-items:center;gap:12px;margin-bottom:24px;font-size:18px;font-weight:700;letter-spacing:-0.3px;
+        }
+        .card-title .ico{
+            width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;
+        }
+        .ico-p{background:linear-gradient(135deg,#F0EDFF,#E8E5FF);color:var(--primary);box-shadow:0 2px 8px rgba(108,92,231,0.15);}
+        .ico-r{background:linear-gradient(135deg,#FFF0F5,#FFE8F0);color:var(--accent);box-shadow:0 2px 8px rgba(253,121,168,0.15);}
+        .ico-g{background:linear-gradient(135deg,#E6FFF8,#D5F5E3);color:var(--success);box-shadow:0 2px 8px rgba(0,184,148,0.15);}
+
+        /* Form */
+        .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        @media(max-width:768px){.f-grid{grid-template-columns:1fr;}}
+        .f-group{display:flex;flex-direction:column;gap:6px;}
+        .f-group label{font-size:13px;font-weight:600;color:var(--text);letter-spacing:0.2px;}
+        .f-group label .req{color:var(--danger);margin-left:3px;font-weight:700;}
+        .f-hint{font-size:11px;color:var(--text3);}
+        .f-input, .f-textarea, .f-select{
+            width:100%;padding:12px 16px;border:2px solid #EAE6F5;border-radius:var(--radius-xs);
+            font-size:14px;font-family:inherit;transition:all .3s cubic-bezier(.4,0,.2,1);
+            background:#FAFAFF;color:var(--text);outline:none;
+        }
+        .f-input:hover, .f-textarea:hover, .f-select:hover{border-color:#D5D0F0;}
+        .f-input:focus, .f-textarea:focus, .f-select:focus{
+            border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,231,0.06);background:white;
+        }
+        .f-textarea{resize:vertical;min-height:90px;line-height:1.7;}
+        .f-select{
+            -webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%236C5CE7' d='M7 10L2 4h10z'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;
+            position:relative;z-index:1;min-height:46px;
+        }
+        .f-select option{padding:10px 16px;font-size:14px;}
+
+        /* Tags */
+        .tags-box{
+            display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border:2px solid #EAE6F5;
+            border-radius:var(--radius-xs);background:#FAFAFF;min-height:48px;align-items:center;
+            cursor:text;transition:all .3s cubic-bezier(.4,0,.2,1);
+        }
+        .tags-box:hover{border-color:#D5D0F0;}
+        .tags-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,231,0.06);background:white;}
+        .tag{
+            display:inline-flex;align-items:center;gap:5px;padding:5px 14px;
+            background:linear-gradient(135deg,#F0EDFF,#E8E5FF);border-radius:50px;
+            font-size:13px;color:var(--primary);font-weight:500;white-space:nowrap;
+            box-shadow:0 1px 4px rgba(108,92,231,0.08);transition:all .2s;
+        }
+        .tag:hover{transform:scale(1.02);box-shadow:0 2px 8px rgba(108,92,231,0.15);}
+        .tag-x{
+            cursor:pointer;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-size:11px;background:rgba(108,92,231,0.12);transition:all .2s;line-height:1;
+        }
+        .tag-x:hover{background:var(--danger);color:white;transform:scale(1.1);}
+        .tag-in{
+            border:none;outline:none;font-size:13px;flex:1;min-width:80px;background:transparent;
+            font-family:inherit;color:var(--text);
+        }
+        .tag-in::placeholder{color:#B2BEC3;}
+
+        /* Buttons */
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:50px;
+            font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .3s cubic-bezier(.4,0,.2,1);
+            font-family:inherit;letter-spacing:0.3px;
+        }
+        .btn-p{
+            background:var(--gradient);color:white;box-shadow:0 4px 20px rgba(108,92,231,0.3);
+        }
+        .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,92,231,0.4);}
+        .btn-p:active{transform:translateY(0);}
+        .btn-o{
+            background:white;color:var(--primary);border:2px solid var(--primary);
+        }
+        .btn-o:hover{background:rgba(108,92,231,0.04);transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,92,231,0.12);}
+        .btn-sm{padding:7px 18px;font-size:13px;}
+        .btn-actions{display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
+        .btn:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;transform:none!important;box-shadow:none!important;}
+
+        /* Match Results */
+        .match-list{display:flex;flex-direction:column;gap:14px;}
+        .match-card{
+            background:var(--surface);border:2px solid #F0EDFF;border-radius:var(--radius-sm);
+            padding:24px;cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);
+            position:relative;overflow:hidden;
+            animation: cardSlideIn .5s ease-out backwards;
+        }
+        .match-card:nth-child(1){animation-delay:.05s}
+        .match-card:nth-child(2){animation-delay:.1s}
+        .match-card:nth-child(3){animation-delay:.15s}
+        .match-card:nth-child(4){animation-delay:.2s}
+        .match-card:nth-child(5){animation-delay:.25s}
+        .match-card:nth-child(6){animation-delay:.3s}
+        .match-card:nth-child(7){animation-delay:.35s}
+        .match-card:nth-child(8){animation-delay:.4s}
+        @keyframes cardSlideIn {
+            from{opacity:0;transform:translateY(16px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+        .match-card::before{
+            content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+            background:var(--gradient);opacity:0;transition:opacity .35s;border-radius:0 4px 4px 0;
+        }
+        .match-card:hover{border-color:var(--primary);box-shadow:0 8px 32px rgba(108,92,231,0.1);transform:translateY(-3px);}
+        .match-card:hover::before{opacity:1;}
+        .match-card.top{border-color:var(--primary);background:linear-gradient(135deg,rgba(108,92,231,0.02),rgba(253,121,168,0.015));}
+        .match-card.top::before{opacity:1;width:4px;}
+        .match-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px;}
+        .match-title{font-size:17px;font-weight:700;letter-spacing:-0.2px;}
+        .match-score{display:flex;align-items:center;gap:8px;}
+        .score-ring{
+            width:52px;height:52px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-weight:800;font-size:17px;flex-shrink:0;
+            transition:transform .3s;
+        }
+        .match-card:hover .score-ring{transform:scale(1.08);}
+        .s-high{background:#E6FFF8;color:var(--success);box-shadow:0 4px 16px rgba(0,184,148,0.2);}
+        .s-mid{background:#FFF9E6;color:#E17055;box-shadow:0 4px 16px rgba(253,203,110,0.2);}
+        .s-low{background:#FFF0F0;color:var(--danger);box-shadow:0 4px 16px rgba(225,112,85,0.15);}
+        .match-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-bottom:10px;}
+        .match-meta span{display:flex;align-items:center;gap:4px;padding:4px 10px;background:#FAFAFF;border-radius:6px;}
+        .match-tags{display:flex;flex-wrap:wrap;gap:8px;}
+        .t-good{padding:4px 12px;border-radius:50px;font-size:12px;font-weight:500;background:#E6FFF8;color:#00B894;}
+        .t-bad{padding:4px 12px;border-radius:50px;font-size:12px;font-weight:500;background:#FFF0F0;color:#E17055;}
+        .match-detail{margin-top:14px;padding:18px;background:#FAFAFF;border-radius:var(--radius-sm);display:none;animation:detailIn .3s ease;}
+        @keyframes detailIn{from{opacity:0;max-height:0;}to{opacity:1;max-height:500px;}}
+        .match-detail.show{display:block;}
+        .d-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EDFF;font-size:13px;}
+        .d-row:last-child{border-bottom:none;}
+        .d-label{color:var(--text2);font-weight:500;}
+        .d-val{font-weight:600;}
+
+        /* Optimization */
+        .jd-area{display:flex;flex-direction:column;gap:10px;}
+        .jd-link-box{text-align:center;padding:8px 0;}
+        .jd-link-btn{
+            display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#00B894,#00CEC9);
+            color:white;border-radius:50px;font-weight:600;font-size:14px;text-decoration:none;
+            box-shadow:0 4px 16px rgba(0,184,148,0.3);transition:all .3s cubic-bezier(.4,0,.2,1);
+        }
+        .jd-link-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,184,148,0.4);}
+        .upload-zone{
+            border:2px dashed #D5D0F0;border-radius:var(--radius-sm);padding:32px 24px;text-align:center;
+            cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);background:#FAFAFF;
+        }
+        .upload-zone:hover{border-color:var(--primary);background:rgba(108,92,231,0.02);transform:scale(1.01);}
+        .upload-icon{font-size:40px;margin-bottom:10px;transition:transform .3s;}
+        .upload-zone:hover .upload-icon{transform:translateY(-4px);}
+        .upload-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+        .upload-hint{font-size:12px;color:var(--text3);}
+        .resume-preview{
+            border:2px solid #E0DCF0;border-radius:var(--radius-sm);
+            background:#fff;overflow:hidden;transition:all .3s;
+        }
+        .resume-preview-header{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:12px 16px;background:linear-gradient(135deg,#F0EDFF,#E8E5FF);
+            border-bottom:1px solid #E0DCF0;gap:12px;flex-wrap:wrap;
+        }
+        .resume-preview-meta{
+            display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+        }
+        .resume-preview-badge{
+            display:inline-flex;align-items:center;gap:4px;
+            padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;
+        }
+        .resume-preview-badge.file{background:rgba(108,92,231,0.1);color:var(--primary);}
+        .resume-preview-badge.chars{background:rgba(0,184,148,0.1);color:var(--success);}
+        .resume-preview-badge.warn{background:rgba(253,203,110,0.15);color:#B8860B;}
+        .resume-text{
+            font-size:13px;color:var(--text);white-space:pre-wrap;word-break:break-word;
+            line-height:1.8;padding:18px 20px;max-height:360px;overflow-y:auto;
+            background:#FAFBFC;font-family: inherit;
+        }
+        .opt-result{
+            margin-top:20px;padding:24px;background:#FAFAFF;border-radius:var(--radius-sm);
+            border:2px solid #F0EDFF;animation:optSlideIn .5s ease;
+        }
+        @keyframes optSlideIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .opt-sec{margin-bottom:20px;}
+        .opt-sec:last-child{margin-bottom:0;}
+        .opt-sec-title{font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+        .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+        .dot-p{background:var(--primary);box-shadow:0 0 8px rgba(108,92,231,0.4);}
+        .dot-r{background:var(--accent);box-shadow:0 0 8px rgba(253,121,168,0.4);}
+        .dot-g{background:var(--success);box-shadow:0 0 8px rgba(0,184,148,0.4);}
+        .kw{
+            display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:50px;
+            font-size:12px;font-weight:600;margin:3px 5px;transition:transform .2s;
+        }
+        .kw:hover{transform:scale(1.05);}
+        .kw-y{background:#E6FFF8;color:#00B894;}
+        .kw-n{background:#FFF0F0;color:#E17055;}
+        .opt-list{list-style:none;padding:0;}
+        .opt-list li{
+            padding:10px 16px;margin:6px 0;background:white;border-radius:10px;
+            font-size:13px;border-left:3px solid var(--primary);line-height:1.7;
+            transition:all .2s;
+        }
+        .opt-list li:hover{box-shadow:var(--shadow-sm);transform:translateX(2px);}
+        .opt-list li.gap{border-left-color:var(--accent);}
+        .opt-list li.pf{border-left-color:var(--success);}
+
+        /* Filter */
+        .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+        .chip{
+            padding:7px 18px;border-radius:50px;font-size:13px;font-weight:500;cursor:pointer;
+            border:2px solid #EAE6F5;background:white;color:var(--text2);transition:all .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;
+        }
+        .chip.active{border-color:var(--primary);background:linear-gradient(135deg,rgba(108,92,231,0.08),rgba(108,92,231,0.03));color:var(--primary);font-weight:600;}
+        .chip:hover{border-color:var(--primary2);transform:translateY(-1px);box-shadow:0 2px 12px rgba(108,92,231,0.08);}
+
+        /* Search */
+        .search-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+        .search-input-wrap{position:relative;flex:1;min-width:180px;}
+        .search-icon{
+            position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3);
+            transition:color .3s;
+        }
+        .search-input{
+            width:100%;padding:12px 16px 12px 42px;border:2px solid #EAE6F5;border-radius:50px;
+            font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);
+            transition:all .3s cubic-bezier(.4,0,.2,1);outline:none;
+        }
+        .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,231,0.06);}
+        .search-input:focus ~ .search-icon{color:var(--primary);}
+        .search-input::placeholder{color:#B2BEC3;}
+        .search-select{
+            padding:11px 16px;border:2px solid #EAE6F5;border-radius:50px;
+            font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);
+            cursor:pointer;outline:none;transition:all .3s cubic-bezier(.4,0,.2,1);min-width:130px;
+            -webkit-appearance:none;appearance:none;
+        }
+        .search-select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,231,0.06);}
+        .search-select:hover{border-color:#D5D0F0;}
+
+        /* Empty */
+        .empty{text-align:center;padding:60px 20px;color:var(--text2);}
+        .empty-icon{font-size:56px;margin-bottom:16px;animation:floatUp 3s ease-in-out infinite;}
+        .empty p{font-size:15px;color:var(--text3);}
+
+        /* Toast */
+        .toast{
+            position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:14px 28px;
+            border-radius:50px;font-size:14px;font-weight:600;z-index:1000;
+            animation:toastIn .35s cubic-bezier(.4,0,.2,1);
+            box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(10px);
+        }
+        @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-16px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        .toast-s{background:rgba(230,255,248,0.95);color:#00B894;border:1px solid #B2F0E0;}
+        .toast-i{background:rgba(240,237,255,0.95);color:var(--primary);border:1px solid #D5D0FF;}
+        .toast-w{background:rgba(255,249,230,0.95);color:#E17055;border:1px solid #FDE68A;}
+
+        /* Skill bar */
+        .sbar{display:flex;align-items:center;gap:12px;margin:8px 0;}
+        .sbar-name{width:100px;font-size:13px;font-weight:500;text-align:right;flex-shrink:0;color:var(--text2);}
+        .sbar-track{flex:1;height:10px;background:#F0EDFF;border-radius:5px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);}
+        .sbar-fill{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.4,0,.2,1);position:relative;}
+        .sbar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(255,255,255,0.5);border-radius:1px;}
+        .fill-h{background:linear-gradient(90deg,var(--success),#55EFC4);}
+        .fill-m{background:linear-gradient(90deg,var(--warning),#FDE68A);}
+        .fill-l{background:linear-gradient(90deg,var(--danger),#F17055);}
+        .sbar-pct{width:42px;font-size:13px;font-weight:700;color:var(--text);}
+
+        /* Quick skill links */
+        .quick-skills{margin-top:6px;}
+        .quick-skills a{
+            color:var(--primary);cursor:pointer;font-size:12px;font-weight:500;
+            text-decoration:none;padding:2px 6px;border-radius:4px;transition:all .2s;
+        }
+        .quick-skills a:hover{color:var(--accent);background:rgba(108,92,231,0.06);}
+
+        /* Footer */
+        .app-footer{
+            text-align:center;padding:32px 20px 24px;color:var(--text3);font-size:13px;
+            border-top:1px solid rgba(108,92,231,0.06);position:relative;z-index:1;
+            background:rgba(255,255,255,0.4);backdrop-filter:blur(10px);
+        }
+        .app-footer strong{color:var(--primary);font-weight:600;}
+        .app-footer span{margin:0 6px;}
+        .footer-links{
+            display:flex;justify-content:center;flex-wrap:wrap;gap:20px;margin-bottom:16px;
+        }
+        .footer-links a{
+            color:var(--text2);text-decoration:none;font-size:12px;transition:color .2s;
+        }
+        .footer-links a:hover{color:var(--primary);}
+        .footer-bottom{font-size:11px;color:var(--text3);margin-top:8px;}
+
+        /* ===== NAV ===== */
+        .app-nav{
+            display:flex;align-items:center;gap:8px;flex:1;justify-content:center;
+        }
+        .nav-link{
+            padding:8px 18px;border-radius:50px;font-size:14px;font-weight:500;
+            color:var(--text2);text-decoration:none;transition:all .3s;cursor:pointer;
+        }
+        .nav-link:hover{background:rgba(108,92,231,0.06);color:var(--primary);}
+        .nav-cta{
+            background:var(--gradient);color:white !important;font-weight:600;
+            box-shadow:0 4px 16px rgba(108,92,231,0.25);
+        }
+        .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(108,92,231,0.35);}
+
+        /* ===== NEW HERO ===== */
+        .hero-stats{
+            display:flex;justify-content:center;gap:40px;margin:20px 0 16px;flex-wrap:wrap;
+        }
+        .hero-stat{
+            text-align:center;animation:heroFadeIn 1.2s ease-out;
+        }
+        .hero-stat-num{
+            font-size:28px;font-weight:800;background:var(--gradient);
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+        }
+        .hero-stat-label{font-size:12px;color:var(--text3);margin-top:2px;}
+        .hero-cta-row{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+        .btn-hero{
+            padding:14px 36px;font-size:16px;font-weight:700;border-radius:50px;border:none;
+            cursor:pointer;transition:all .35s cubic-bezier(.4,0,.2,1);font-family:inherit;
+        }
+        .btn-hero-primary{
+            background:var(--gradient);color:white;box-shadow:0 8px 32px rgba(108,92,231,0.35);
+        }
+        .btn-hero-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(108,92,231,0.45);}
+        .btn-hero-secondary{
+            background:white;color:var(--primary);border:2px solid var(--primary);
+        }
+        .btn-hero-secondary:hover{background:rgba(108,92,231,0.04);transform:translateY(-2px);}
+
+        /* ===== FEATURE PREVIEW ===== */
+        .feature-section{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:16px;margin:32px 0 28px;
+        }
+        .feature-card{
+            background:var(--surface);border-radius:var(--radius-sm);padding:24px;
+            box-shadow:var(--shadow-sm);border:1px solid rgba(108,92,231,0.05);
+            transition:all .35s cubic-bezier(.4,0,.2,1);text-align:center;
+        }
+        .feature-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+        .feature-icon{
+            width:56px;height:56px;border-radius:16px;margin:0 auto 14px;
+            display:flex;align-items:center;justify-content:center;font-size:26px;
+        }
+        .fi-1{background:linear-gradient(135deg,#F0EDFF,#E8E5FF);}
+        .fi-2{background:linear-gradient(135deg,#FFF0F5,#FFE8F0);}
+        .fi-3{background:linear-gradient(135deg,#E6FFF8,#D5F5E3);}
+        .fi-4{background:linear-gradient(135deg,#FFF9E6,#FEF3C7);}
+        .feature-card h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text);}
+        .feature-card p{font-size:12px;color:var(--text2);line-height:1.6;}
+        .feature-preview-img{
+            margin-top:12px;padding:10px;background:#FAFAFF;border-radius:8px;
+            font-size:11px;color:var(--text3);text-align:left;line-height:1.8;
+            font-family:'SF Mono','Menlo',monospace;max-height:100px;overflow:hidden;
+        }
+        .feature-preview-img .green{color:var(--success);}
+        .feature-preview-img .purple{color:var(--primary);}
+        .feature-preview-img .red{color:var(--danger);}
+
+        /* ===== TRUST SECTION ===== */
+        .trust-section{
+            max-width:900px;margin:48px auto 20px;text-align:center;
+        }
+        .trust-section h3{
+            font-size:20px;font-weight:800;margin-bottom:8px;color:var(--text);
+        }
+        .trust-section > p{font-size:14px;color:var(--text2);margin-bottom:24px;}
+        .logo-wall{
+            display:flex;justify-content:center;flex-wrap:wrap;gap:16px;margin-bottom:28px;
+        }
+        .logo-item{
+            padding:12px 20px;background:white;border-radius:var(--radius-xs);
+            box-shadow:var(--shadow-sm);font-size:13px;font-weight:600;color:var(--text2);
+            display:flex;align-items:center;gap:6px;transition:all .3s;
+        }
+        .logo-item:hover{transform:translateY(-2px);box-shadow:var(--shadow);color:var(--primary);}
+        .testimonial{
+            background:linear-gradient(135deg,#F5F3FF,#FAFAFF);
+            border-radius:var(--radius-sm);padding:20px 24px;margin:16px 0;
+            font-size:13px;color:var(--text2);line-height:1.8;text-align:left;
+            border:1px solid rgba(108,92,231,0.06);
+        }
+        .testimonial-footer{
+            display:flex;align-items:center;gap:10px;margin-top:10px;
+            padding-top:10px;border-top:1px solid rgba(108,92,231,0.08);
+        }
+        .testimonial-avatar{
+            width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+            justify-content:center;font-weight:700;font-size:14px;
+            background:var(--gradient);color:white;
+        }
+        .testimonial-name{font-size:13px;font-weight:600;color:var(--text);}
+        .testimonial-role{font-size:11px;color:var(--text3);}
+        .safety-badges{
+            display:flex;justify-content:center;gap:32px;margin-top:24px;flex-wrap:wrap;
+        }
+        .safety-badge{
+            display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);
+        }
+        .safety-badge-icon{
+            width:28px;height:28px;border-radius:8px;background:rgba(0,184,148,0.1);
+            display:flex;align-items:center;justify-content:center;font-size:14px;
+        }
+
+        /* Step label with unlock hint */
+        .step-locked-hint{
+            position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);
+            background:rgba(0,0,0,0.75);color:white;font-size:11px;padding:4px 10px;
+            border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;
+            transition:opacity .25s;
+        }
+        .step.locked{position:relative;}
+        .step.locked:hover .step-locked-hint{opacity:1;}
+
+        /* Responsive */
+        @media(max-width:768px){
+            .container{padding:20px 16px 60px;}
+            .app-header{padding:0 16px;flex-wrap:wrap;height:auto;padding-top:8px;padding-bottom:8px;}
+            .app-nav{order:3;width:100%;justify-content:center;padding:4px 0;}
+            .nav-link{padding:6px 12px;font-size:12px;}
+            .card{padding:22px;}
+            .hero h1{font-size:26px;}
+            .hero p{font-size:14px;}
+            .hero-stats{gap:20px;}
+            .hero-stat-num{font-size:22px;}
+            .step{padding:8px 14px;font-size:12px;}
+            .step-line{width:20px;}
+            .match-meta{flex-direction:column;gap:6px;}
+            .filter-bar{gap:6px;}
+            .header-stats{display:none;}
+            .bg-dot{display:none;}
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decorations">
+        <div class="bg-dot"></div>
+        <div class="bg-dot"></div>
+        <div class="bg-dot"></div>
+        <div class="bg-dot"></div>
+        <div class="bg-dot"></div>
+    </div>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-brand"><div class="logo">🎨</div>ArtMatch</div>
+            <div class="app-nav">
+                <a class="nav-link" onclick="scrollToFeature()">功能特色</a>
+                <a class="nav-link nav-cta" onclick="scrollToStep()">🎯 免费开始匹配</a>
+            </div>
+            <div class="header-stats">
+                <span class="update-badge" id="updateBadge">🔄 每日15:00动态更新</span>
+                <span>📋 岗位库 <strong id="jobLibCount">9000+</strong> 个</span>
+            </div>
+        </header>
+
+        <div class="container" id="mainContent">
+            <div class="hero">
+                <h1>专为艺术生打造的AI求职平台</h1>
+                <p>一键匹配设计 / 影视 / 音乐 / 舞蹈 / 戏剧等垂直领域岗位，AI智能优化专业简历，让艺术生求职不再「不对口」</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">9,800+</div>
+                        <div class="hero-stat-label">艺术类岗位覆盖</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">186</div>
+                        <div class="hero-stat-label">细分专业方向</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num" id="dailyNewCount">1,200+</div>
+                        <div class="hero-stat-label">今日新增优质岗位</div>
+                    </div>
+                </div>
+                <div class="hero-cta-row">
+                    <button class="btn-hero btn-hero-primary" onclick="scrollToStep()">✨ 免费开始匹配</button>
+                    <button class="btn-hero btn-hero-secondary" onclick="scrollToFeature()">了解更多 →</button>
+                </div>
+            </div>
+
+            <!-- Feature Preview -->
+            <div class="feature-section" id="featureSection">
+                <div class="feature-card">
+                    <div class="feature-icon fi-1">👤</div>
+                    <h4>完善专业背景</h4>
+                    <p>填写专业、技能、求职方向，系统精准理解您的背景</p>
+                    <div class="feature-preview-img">
+                        ✓ 专业大类：<span class="purple">美术/设计类</span><br>
+                        ✓ 技能标签：<span class="green">Figma, PS, AI, Blender</span><br>
+                        ✓ 求职方向：<span class="purple">UI/UX设计</span>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-2">🎯</div>
+                    <h4>AI智能匹配岗位</h4>
+                    <p>六维评分算法，从9800+岗位中精准匹配最适合您的机会</p>
+                    <div class="feature-preview-img">
+                        🏢 某头部互联网公司<br>
+                        <span class="purple">资深UI/UX设计师</span><br>
+                        <span class="green">匹配度 87%</span> &nbsp;|&nbsp; 20-35K·16薪
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-3">📝</div>
+                    <h4>简历智能优化</h4>
+                    <p>上传简历获深度分析，或获取专业的简历书写框架与建议</p>
+                    <div class="feature-preview-img">
+                        <span class="red">✗ 缺少：</span>设计系统、用户研究<br>
+                        <span class="green">✓ 已覆盖：</span>Figma、交互设计<br>
+                        <span class="purple">→ 建议：</span>在项目经历中嵌入关键词
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-4">🛡️</div>
+                    <h4>每日动态更新</h4>
+                    <p>岗位池每日15:00自动刷新，不错过最新的招聘机会</p>
+                    <div style="margin-top:10px;font-size:12px;color:var(--text2);line-height:1.8;">
+                        🕒 上次更新：刚刚<br>
+                        📊 覆盖城市：北京、上海、深圳等<br>
+                        🏷️ 覆盖行业：互联网、影视、教育等
+                    </div>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="steps" id="stepIndicator">
+                <div class="step active" onclick="goToStep(1)">
+                    <span class="step-num" id="stepNum1">1</span>完善个人背景
+                </div>
+                <div class="step-line" id="stepLine1"></div>
+                <div class="step locked" onclick="goToStep(2)" id="stepBtn2">
+                    <span class="step-num" id="stepNum2">2</span>智能匹配
+                    <span class="step-locked-hint">完善背景后解锁</span>
+                </div>
+                <div class="step-line" id="stepLine2"></div>
+                <div class="step locked" onclick="goToStep(3)" id="stepBtn3">
+                    <span class="step-num" id="stepNum3">3</span>简历优化
+                    <span class="step-locked-hint">完善背景后解锁</span>
+                </div>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="step1Panel">
+                <div class="card">
+                    <div class="card-title"><div class="ico ico-p">👤</div>个人背景信息</div>
+                    <div class="f-grid">
+                        <div class="f-group">
+                            <label>姓名 <span class="req">*</span></label>
+                            <input class="f-input" id="profName" placeholder="请输入姓名" maxlength="20" autocomplete="off">
+                        </div>
+                        <div class="f-group">
+                            <label>专业大类 <span class="req">*</span></label>
+                            <select class="f-select" id="profMajorCat" onchange="onMajorCatChange()">
+                                <option value="">请选择专业大类</option>
+                                <option value="美术设计类">美术/设计类</option>
+                                <option value="音乐类">音乐类</option>
+                                <option value="舞蹈类">舞蹈类</option>
+                                <option value="戏剧影视类">戏剧影视类</option>
+                                <option value="传媒类">传媒/新媒体类</option>
+                                <option value="艺术学理论类">艺术学理论类</option>
+                                <option value="艺术教育类">艺术教育类</option>
+                                <option value="其他">其他（请自行填写）</option>
+                            </select>
+                        </div>
+                        <div class="f-group" id="majorSubGroup">
+                            <label>专业方向 <span class="req">*</span></label>
+                            <select class="f-select" id="profMajorSub" onchange="onMajorSubChange()">
+                                <option value="">请先选择专业大类</option>
+                            </select>
+                        </div>
+                        <div class="f-group" id="majorCustomGroup" style="display:none;">
+                            <label>请输入专业具体名称 <span class="req">*</span></label>
+                            <input class="f-input" id="profMajorCustom" placeholder="请填写您的专业具体名称" onchange="saveProfile()" oninput="saveProfileDebounced()" autocomplete="off">
+                        </div>
+                        <div class="f-group">
+                            <label>学历</label>
+                            <select class="f-select" id="profEdu">
+                                <option value="">请选择学历</option>
+                                <option>大专</option><option>本科</option><option>硕士</option><option>博士</option>
+                            </select>
+                        </div>
+                        <div class="f-group">
+                            <label>毕业院校</label>
+                            <input class="f-input" id="profSchool" placeholder="请输入毕业院校" autocomplete="off">
+                        </div>
+                        <div class="f-group">
+                            <label>期望城市</label>
+                            <input class="f-input" id="profCity" placeholder="如：北京、上海、杭州" autocomplete="off">
+                        </div>
+                        <div class="f-group">
+                            <label>工作年限</label>
+                            <select class="f-select" id="profExp">
+                                <option value="">请选择</option>
+                                <option>应届生</option><option>1年以内</option><option>1-3年</option>
+                                <option>3-5年</option><option>5年以上</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="f-grid">
+                            <div class="f-group">
+                                <label>软件技能</label>
+                                <span class="f-hint">输入技能名称后按回车添加</span>
+                                <div class="tags-box" id="skillBox">
+                                    <input class="tag-in" id="skillInput" placeholder="如：Photoshop、Blender、Figma..." autocomplete="off">
+                                </div>
+                                <div class="quick-skills">
+                                    常用推荐：
+                                    <a onclick="addQuickSkill('PS')">PS</a> ·
+                                    <a onclick="addQuickSkill('AI')">AI</a> ·
+                                    <a onclick="addQuickSkill('Figma')">Figma</a> ·
+                                    <a onclick="addQuickSkill('Blender')">Blender</a> ·
+                                    <a onclick="addQuickSkill('C4D')">C4D</a> ·
+                                    <a onclick="addQuickSkill('AE')">AE</a> ·
+                                    <a onclick="addQuickSkill('PR')">PR</a> ·
+                                    <a onclick="addQuickSkill('Sketch')">Sketch</a>
+                                </div>
+                            </div>
+                            <div class="f-group">
+                                <label>硬件/手工技能</label>
+                                <span class="f-hint">输入技能后按回车添加</span>
+                                <div class="tags-box" id="hwBox">
+                                    <input class="tag-in" id="hwInput" placeholder="如：手绘、陶艺、摄影、版画..." autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="f-grid">
+                            <div class="f-group">
+                                <label>求职方向类别 <span class="req">*</span></label>
+                                <select class="f-select" id="profDirCat" onchange="onDirCatChange()">
+                                    <option value="">请选择求职方向类别</option>
+                                    <option value="视觉与传达设计">视觉与传达设计</option>
+                                    <option value="数字媒体与动画">数字媒体与动画</option>
+                                    <option value="影视与新媒体">影视与新媒体</option>
+                                    <option value="空间与产品设计">空间与产品设计</option>
+                                    <option value="时尚与工艺美术">时尚与工艺美术</option>
+                                    <option value="音乐与录音艺术">音乐与录音艺术</option>
+                                    <option value="表演与舞台艺术">表演与舞台艺术</option>
+                                    <option value="艺术理论与教育">艺术理论与教育</option>
+                                    <option value="其他">其他（请自行填写）</option>
+                                </select>
+                            </div>
+                            <div class="f-group" id="dirSubGroup">
+                                <label>具体方向 <span class="req">*</span></label>
+                                <select class="f-select" id="profDirSub" onchange="onDirSubChange()">
+                                    <option value="">请先选择求职方向类别</option>
+                                </select>
+                            </div>
+                            <div class="f-group" id="dirCustomGroup" style="display:none;">
+                                <label>请输入求职方向具体名称 <span class="req">*</span></label>
+                                <input class="f-input" id="profDirCustom" placeholder="请输入您期望的具体岗位方向" onchange="saveProfile()" oninput="saveProfileDebounced()" autocomplete="off">
+                            </div>
+                            <div class="f-group">
+                                <label>作品集链接</label>
+                                <input class="f-input" id="profPortfolio" placeholder="如：https://zcool.com.cn/xxx 或 Behance链接" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="f-group">
+                            <label>项目经历描述</label>
+                            <span class="f-hint">描述1-3个重要项目，包括项目名称、你的角色、使用的技术/工具、成果</span>
+                            <textarea class="f-textarea" id="profProjects" rows="4" placeholder="示例：&#10;1. 「城市记忆」品牌VI设计 - 主设计师 - 独立完成logo、字体、应用延展设计 - 使用AI+PS - 获学院优秀毕业设计&#10;2. 某电商APP界面改版 - UI设计师 - 负责首页和详情页重设计 - 使用Figma+Principle - 上线后转化率提升15%"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="f-group">
+                            <label>📄 上传简历 <span style="font-weight:400;font-size:12px;color:var(--text2);">（选填，上传后可获得简历深度分析）</span></label>
+                            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('resumeFile').click()">
+                                <input type="file" id="resumeFile" accept=".txt,.pdf,.docx" onchange="handleResumeUpload(event)" style="display:none;">
+                                <div class="upload-icon">📂</div>
+                                <div class="upload-text">点击上传或拖拽简历文件到此处</div>
+                                <div class="upload-hint">支持 .txt / .pdf / .docx，上传后自动解析</div>
+                            </div>
+                            <div id="resumePreview" class="resume-preview" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="btn-actions">
+                        <button class="btn btn-o btn-sm" onclick="resetAll()">重置</button>
+                        <button class="btn btn-p" onclick="goToMatch()">✨ 开始智能匹配</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step2Panel" style="display:none;">
+                <div class="card">
+                    <div class="card-title">
+                        <div class="ico ico-p">🎯</div>
+                        岗位智能匹配结果
+                        <span style="font-size:13px;font-weight:400;color:var(--text2);margin-left:auto;" id="matchCount">共匹配 0 个岗位</span>
+                    </div>
+
+                    <div class="search-bar">
+                        <div class="search-input-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input class="search-input" id="searchKeyword" placeholder="搜索职位、公司、技能..." oninput="onSearchChange()" autocomplete="off">
+                        </div>
+                        <select class="search-select" id="searchCity" onchange="onSearchChange()">
+                            <option value="">📍 所有城市</option>
+                        </select>
+                        <select class="search-select" id="searchSalary" onchange="onSearchChange()">
+                            <option value="">💰 薪资不限</option>
+                            <option value="应届">应届/实习</option>
+                            <option value="10K以下">10K以下</option>
+                            <option value="10-20K">10-20K</option>
+                            <option value="20-30K">20-30K</option>
+                            <option value="30K以上">30K以上</option>
+                        </select>
+                        <button class="btn btn-o btn-sm" onclick="refreshMatches()">🔄</button>
+                        <span style="font-size:13px;color:var(--text2);" id="searchResultInfo"></span>
+                    </div>
+
+                    <div id="matchEmpty" class="empty" style="display:none;">
+                        <div class="empty-icon">📋</div>
+                        <p>请先完善个人背景信息，再进行岗位匹配</p>
+                        <button class="btn btn-p btn-sm" style="margin-top:12px;" onclick="goToStep(1);">去填写信息</button>
+                    </div>
+
+                    <div id="matchList" class="match-list"></div>
+                    <div id="loadMoreWrap" style="text-align:center;margin-top:16px;display:none;">
+                        <button class="btn btn-o" id="btnLoadMore" onclick="loadMore()">📋 加载更多岗位</button>
+                        <span style="font-size:13px;color:var(--text2);margin-left:12px;" id="loadMoreInfo"></span>
+                    </div>
+
+                    <div id="skillOverview" style="margin-top:20px;display:none;">
+                        <div class="card-title" style="font-size:15px;">
+                            <div class="ico ico-g">📊</div>能力匹配概览
+                        </div>
+                        <div id="skillBars"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="step3Panel" style="display:none;">
+                <div class="card">
+                    <div class="card-title"><div class="ico ico-r">📝</div><span id="step3Title">简历优化建议</span></div>
+                    <div class="jd-area">
+                        <!-- 岗位信息展示（系统自动填充，用户不可编辑） -->
+                        <div id="step3JobInfo" style="background:linear-gradient(135deg,#F0EDFF,#F5F3FF);border-radius:var(--radius-xs);padding:16px 20px;margin-bottom:4px;display:none;">
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                                <div style="flex:1;min-width:200px;">
+                                    <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:4px;" id="step3JobTitle"></div>
+                                    <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+                                        <span id="step3JobMeta"></span>
+                                    </div>
+                                </div>
+                                <div id="jdLinkBox" style="display:none;flex-shrink:0;">
+                                    <a id="jdLink" href="#" target="_blank" class="jd-link-btn" style="font-size:12px;padding:8px 16px;">🏢 前往官网投递 →</a>
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(108,92,231,0.1);">
+                                <div style="font-size:12px;color:var(--text2);max-height:100px;overflow-y:auto;white-space:pre-wrap;line-height:1.7;" id="step3JobDesc"></div>
+                            </div>
+                        </div>
+                        <!-- 分析中状态 -->
+                        <div id="step3Analyzing" style="text-align:center;padding:40px 20px;display:none;">
+                            <div style="font-size:36px;margin-bottom:12px;">⏳</div>
+                            <div style="font-size:15px;font-weight:600;color:var(--primary);">正在分析中，请稍候...</div>
+                            <div style="font-size:12px;color:var(--text3);margin-top:4px;">系统正在结合岗位JD与您的背景进行智能分析</div>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <button class="btn btn-p" id="btnAnalyze" onclick="analyzeResume()" style="display:none;">🔍 重新分析</button>
+                            <span style="font-size:12px;color:var(--text3);" id="step3Hint"></span>
+                        </div>
+                    </div>
+                    <div id="optResult" class="opt-result" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast" class="toast" style="display:none;"></div>
+    </div>
+
+    <!-- Trust Section -->
+    <div class="container" style="padding-top:0;">
+        <div class="trust-section">
+            <h3>深受艺术生信赖的求职伙伴</h3>
+            <p>已帮助 3,200+ 艺术类毕业生精准匹配理想岗位</p>
+            
+            <div class="logo-wall">
+                <div class="logo-item">🎮 腾讯游戏</div>
+                <div class="logo-item">🎬 华谊兄弟</div>
+                <div class="logo-item">🎵 网易云音乐</div>
+                <div class="logo-item">🎨 站酷</div>
+                <div class="logo-item">📱 字节跳动</div>
+                <div class="logo-item">🏛️ 中国美术馆</div>
+                <div class="logo-item">🎼 摩登天空</div>
+                <div class="logo-item">🎭 国家大剧院</div>
+            </div>
+
+            <div class="testimonial">
+                "作为一名视觉传达专业毕业生，之前投了很多简历都石沉大海。ArtMatch帮我精准匹配到了腾讯的UI设计岗位，还针对性优化了简历中缺少「设计系统」关键词的问题。投递3天后就收到了面试邀请！"
+                <div class="testimonial-footer">
+                    <div class="testimonial-avatar">林</div>
+                    <div>
+                        <div class="testimonial-name">林同学</div>
+                        <div class="testimonial-role">视觉传达设计 · 2025届 · 入职腾讯</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                "我学的是数字媒体艺术，传统招聘平台很难找到对口岗位。ArtMatch的186个细分方向覆盖真的很全，直接匹配到了影视特效和动态设计的岗位，简历建议也特别实用，让我知道该突出哪些项目经历。"
+                <div class="testimonial-footer">
+                    <div class="testimonial-avatar">陈</div>
+                    <div>
+                        <div class="testimonial-name">陈同学</div>
+                        <div class="testimonial-role">数字媒体艺术 · 2025届 · 入职网易</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="safety-badges">
+                <div class="safety-badge">
+                    <div class="safety-badge-icon">🔒</div>
+                    <span>数据加密存储 · 不上传第三方</span>
+                </div>
+                <div class="safety-badge">
+                    <div class="safety-badge-icon">✅</div>
+                    <span>简历仅用于本次分析 · 可随时清除</span>
+                </div>
+                <div class="safety-badge">
+                    <div class="safety-badge-icon">🆓</div>
+                    <span>核心功能永久免费</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-links">
+            <a onclick="scrollToStep()">免费开始匹配</a>
+            <a onclick="scrollToFeature()">功能特色</a>
+            <a href="#" onclick="return false">用户协议</a>
+            <a href="#" onclick="return false">隐私政策</a>
+            <a href="#" onclick="return false">联系我们</a>
+        </div>
+        <strong>ArtMatch</strong><span>·</span>艺术类学生AI求职智能匹配平台<span>·</span>
+        覆盖9,800+艺术类岗位<span>·</span>186个细分方向
+        <div class="footer-bottom">© 2026 ArtMatch · 沪ICP备XXXXXXXX号 · 数据来源：公开招聘信息聚合，仅供学习参考</div>
+    </footer>
+
+    <script>
+        // ===== CLOUD SYNC MODULE =====
+        const CloudAPI = {
+            BASE: '',
+            token: localStorage.getItem('artmatch_token') || '',
+            
+            async request(method, path, body) {
+                const opts = { method, headers: {} };
+                if (this.token) opts.headers['Authorization'] = 'Bearer ' + this.token;
+                if (body) {
+                    opts.headers['Content-Type'] = 'application/json';
+                    opts.body = JSON.stringify({...body, token: this.token});
+                }
+                try {
+                    const resp = await fetch(this.BASE + path, opts);
+                    const data = await resp.json();
+                    return { ok: resp.ok, data };
+                } catch(e) {
+                    console.log('Cloud API offline, using local fallback');
+                    return { ok: false, data: null };
+                }
+            },
+
+            async register(nickname) {
+                if (!this.token) {
+                    this.token = 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2,10);
+                    localStorage.setItem('artmatch_token', this.token);
+                }
+                const { ok, data } = await this.request('POST', '/api/user/register', { nickname });
+                if (ok && data.token) {
+                    this.token = data.token;
+                    localStorage.setItem('artmatch_token', data.token);
+                }
+                return data;
+            },
+
+            async saveProfile(profileData) {
+                return this.request('POST', '/api/profile/save', { profile: profileData });
+            },
+
+            async loadProfile() {
+                return this.request('POST', '/api/profile/load', {});
+            },
+
+            async saveMatch(jobId, jobTitle, jobCompany, score) {
+                return this.request('POST', '/api/match/save', { jobId, jobTitle, jobCompany, score, action: 'view' });
+            },
+
+            async saveOptimize(jobTitle, jobCompany, userProfile, result) {
+                return this.request('POST', '/api/optimize/save', { jobTitle, jobCompany, userProfile, result });
+            },
+
+            async logActivity(action, detail) {
+                return this.request('POST', '/api/activity/log', { action, detail });
+            },
+
+            async getStats() {
+                return this.request('GET', '/api/stats');
+            },
+
+            async getActivityFeed(limit) {
+                return this.request('GET', '/api/activity/feed?limit=' + (limit||10));
+            },
+
+            getNickname() {
+                return localStorage.getItem('artmatch_nickname') || '';
+            },
+            
+            saveNickname(n) {
+                localStorage.setItem('artmatch_nickname', n);
+            }
+        };
+
+        // ===== REACTIVE STATE =====
+        const state = {
+            step: 1,
+            matchResults: [],
+            displayedResults: [],
+            optResult: null,
+            isAnalyzing: false,
+            selectedJobId: null,
+            selectedJobJd: '',
+            selectedJobTitle: '',
+            selectedJobCompany: '',
+            searchKeyword: '',
+            searchCity: '',
+            searchSalary: '',
+            page: 0,
+            pageSize: 50,
+            allJobsLoaded: false,
+            totalJobCount: 125,
+            resumeText: '',
+            externalJobs: [],
+            cities: new Set()
+        };
+
+        const profile = {
+            name: '', majorCat: '', majorSub: '', majorCustom: '', major: '',
+            education: '', school: '', city: '',
+            experience: '', skills: [], hardwareSkills: [],
+            dirCat: '', dirSub: '', dirCustom: '', jobDirection: '',
+            portfolio: '', projects: ''
+        };
+
+        // ===== MAJOR CATEGORIES DATA =====
+        const majorData = {
+            '美术设计类': {
+                subs: ['视觉传达设计','环境设计','产品设计','数字媒体艺术','动画','服装与服饰设计','工艺美术','绘画（油画/国画/版画/壁画）','雕塑','摄影','书法学','陶艺','漆艺','美术学','艺术与科技','室内设计']
+            },
+            '音乐类': {
+                subs: ['音乐表演','音乐学','作曲与作曲技术理论','声乐演唱','民族音乐','钢琴演奏','管弦乐器演奏','流行音乐','音乐制作','录音艺术','音乐治疗','音乐教育','指挥']
+            },
+            '舞蹈类': {
+                subs: ['舞蹈学','舞蹈编导','舞蹈表演','舞蹈教育','舞蹈治疗','舞蹈生理学','舞蹈科学','现代舞','中国舞','芭蕾舞','民族民间舞','国际标准舞','舞蹈编创']
+            },
+            '戏剧影视类': {
+                subs: ['影视摄影与制作','戏剧影视美术设计','广播电视编导','播音与主持艺术','表演','戏剧学','电影学','舞台美术设计','演出制作','戏剧文学','导演']
+            },
+            '传媒类': {
+                subs: ['新闻传播学','广告学','网络与新媒体','数字媒体技术','传播学','编辑出版学','传媒经济与管理','动画','数字媒体艺术']
+            },
+            '艺术学理论类': {
+                subs: ['艺术史论','艺术管理','美术学','艺术鉴赏','文化产业管理','非遗保护','文博策展']
+            },
+            '艺术教育类': {
+                subs: ['艺术教育','美术教育','音乐教育','舞蹈教育','戏剧教育','学前艺术教育']
+            }
+        };
+
+        // ===== JOB DIRECTION DATA =====
+        const dirData = {
+            '视觉与传达设计': {
+                subs: [
+                    '平面设计师','品牌/VI设计师','视觉设计师','包装设计师','字体设计师',
+                    '电商设计师','海报/画册设计师','导视/标识设计师','动态图形设计师',
+                    '书籍装帧设计师','IP形象设计师','排版/印前设计师','商业插画师',
+                    '儿童绘本插画师','概念设计师','故事板/分镜师','漫画/条漫主笔',
+                    '国风/国潮插画师','医学/科普插画师','AIGC视觉设计师','创意/美术指导'
+                ]
+            },
+            '数字媒体与动画': {
+                subs: [
+                    'UI设计师','UX设计师','B端/企业产品设计师','交互设计师',
+                    'Web/前端设计师','可视化大屏设计师','服务设计师','三维建模师',
+                    '角色/场景模型师','游戏原画师','游戏UI/动效设计师','游戏特效师',
+                    '游戏地编/关卡美术','游戏技术美术TA','游戏动作设计师','2D动画师',
+                    '3D角色动画师','Motion图形动效师','数字人/虚拟偶像制作',
+                    'XR/AR/VR设计师','交互装置设计师','数字孪生设计师',
+                    'NFT/数字藏品设计师','AI生成内容设计师'
+                ]
+            },
+            '影视与新媒体': {
+                subs: [
+                    '影视后期剪辑师','视频特效/包装师','调色师','影视摄影师','纪录片导演',
+                    '影视编剧/剧作','影视制片/统筹','分镜师','影视美术指导',
+                    '短视频编导','短视频运营','直播运营/场控','内容策划/编辑',
+                    '新媒体运营','自媒体博主/KOL运营','社群运营','广告创意/策划',
+                    '品牌公关','社交媒体经理','MCN达人运营','综艺节目编导',
+                    '综艺后期包装师','综艺后期导演','新闻视频编辑','航拍摄影师',
+                    '宠物摄影师','电商摄影师','商业/人像摄影师'
+                ]
+            },
+            '空间与产品设计': {
+                subs: [
+                    '室内设计师','软装设计师','景观设计师','建筑可视化设计师',
+                    '展览展示设计师','美陈设计师','舞台美术设计师','空间体验设计师',
+                    '工业设计师','文创产品设计师','家具设计师','CMF设计师',
+                    '汽车CGI设计师','产品渲染师','灯光/照明设计师','橱窗/陈列设计师',
+                    '文旅夜游设计师','沉浸式空间设计师','公共设施设计师','城市规划可视化'
+                ]
+            },
+            '时尚与工艺美术': {
+                subs: [
+                    '服装/时装设计师','针织/毛衫设计师','潮牌/街头服饰设计师',
+                    '鞋类/箱包设计师','珠宝首饰设计师','钟表/配饰设计师',
+                    '时尚编辑/造型师','化妆/特效化妆师','发型/美发造型师',
+                    '陶瓷/陶艺设计师','雕塑/公共艺术设计师','非遗传承/工艺师',
+                    '国画/书法艺术家','油画/版画艺术家','漆艺/纤维艺术家',
+                    '潮玩/盲盒设计师','纹身/刺青师','手作/皮具设计师','色彩搭配师',
+                    '面料/印花设计师','染织设计师','玻璃/金属工艺师'
+                ]
+            },
+            '音乐与录音艺术': {
+                subs: [
+                    '音乐制作人','编曲师','作曲/配乐师','录音师','混音师/母带师',
+                    '音效设计师','拟音师','游戏音频设计师','有声书/广播剧制作',
+                    '声乐演员','器乐演奏员','指挥/艺术指导','合唱/阿卡贝拉',
+                    '钢琴/键盘手','吉他/贝斯手','鼓手/打击乐手','管弦乐器演奏员',
+                    '民族乐器演奏员','DJ/电子音乐人','音乐版权运营','音乐企划/A&R',
+                    '音乐节/演出策划','音乐治疗师','调律师/乐器维修','即兴戏剧乐师'
+                ]
+            },
+            '表演与舞台艺术': {
+                subs: [
+                    '戏剧/话剧演员','影视演员','儿童剧演员','舞蹈演员/编导',
+                    '街舞舞者/编舞师','中国舞/芭蕾舞者','现代舞/当代舞者',
+                    '国标/拉丁舞者','舞蹈治疗师','导演/副导演','配音演员/声优',
+                    '播音/主持人','模特/T台模特','布偶/木偶演员','杂技/马戏演员',
+                    '舞台监督/剧务','演出制作人/策划','票务/剧场运营','服装表演/平面模特',
+                    '戏剧教育导师','综艺节目主持人','脱口秀演员','即兴戏剧演员'
+                ]
+            },
+            '艺术理论与教育': {
+                subs: [
+                    '美术教师（少儿）','美术教师（艺考）','美术教师（成人）','音乐教师',
+                    '舞蹈教师','书法教师','戏剧/表演教师','艺术培训讲师',
+                    '高校艺术教师','艺术留学顾问','作品集导师','艺术策展人',
+                    '画廊/美术馆助理','博物馆教育专员','艺术品拍卖专员',
+                    '艺术版权运营','艺术史研究员','艺术评论/撰稿人','文化/非遗保护',
+                    '艺术活动策划','艺术经纪/代理人','文物修复师','艺术行政/管理'
+                ]
+            }
+        };
+
+        function onMajorCatChange() {
+            const catVal = document.getElementById('profMajorCat').value;
+            const subSelect = document.getElementById('profMajorSub');
+            const subGroup = document.getElementById('majorSubGroup');
+            const customGroup = document.getElementById('majorCustomGroup');
+            const customInput = document.getElementById('profMajorCustom');
+
+            subSelect.innerHTML = '<option value="">请选择专业方向</option>';
+
+            if (catVal === '其他') {
+                subGroup.style.display = 'none';
+                customGroup.style.display = 'block';
+                profile.majorCat = '其他';
+                profile.majorSub = '';
+            } else if (catVal && majorData[catVal]) {
+                subGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                if (customInput) customInput.value = '';
+                profile.majorCat = catVal;
+                profile.majorSub = '';
+                majorData[catVal].subs.forEach(function(sub) {
+                    var opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subSelect.appendChild(opt);
+                });
+            } else {
+                subGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                profile.majorCat = '';
+                profile.majorSub = '';
+            }
+            updateMajorField();
+            saveProfile();
+        }
+
+        // Safety: re-populate sub-select on focus to fix stale state issues
+        document.addEventListener('DOMContentLoaded', function() {
+            var subEl = document.getElementById('profMajorSub');
+            if (subEl) {
+                subEl.addEventListener('mousedown', function() {
+                    var catVal = document.getElementById('profMajorCat').value;
+                    if (catVal && catVal !== '其他' && this.options.length <= 1) {
+                        onMajorCatChange();
+                    }
+                });
+                subEl.addEventListener('focus', function() {
+                    var catVal = document.getElementById('profMajorCat').value;
+                    if (catVal && catVal !== '其他' && this.options.length <= 1) {
+                        onMajorCatChange();
+                    }
+                });
+            }
+        });
+
+        function onMajorSubChange() {
+            profile.majorSub = document.getElementById('profMajorSub').value;
+            updateMajorField();
+            saveProfile();
+        }
+
+        function updateMajorField() {
+            var catVal = document.getElementById('profMajorCat').value;
+            var customEl = document.getElementById('profMajorCustom');
+            var customVal = customEl ? customEl.value : '';
+            profile.majorCat = catVal;
+
+            if (catVal === '其他') {
+                profile.majorCustom = customVal;
+                profile.major = customVal;
+            } else if (catVal && profile.majorSub) {
+                profile.majorCustom = '';
+                profile.major = profile.majorSub;
+            } else {
+                profile.major = '';
+            }
+        }
+
+        function saveProfileDebounced() {
+            updateMajorField();
+            updateDirField();
+            saveProfile();
+        }
+
+        // ===== JOB DIRECTION CASCADE =====
+        function onDirCatChange() {
+            const catVal = document.getElementById('profDirCat').value;
+            const subSelect = document.getElementById('profDirSub');
+            const subGroup = document.getElementById('dirSubGroup');
+            const customGroup = document.getElementById('dirCustomGroup');
+            const customInput = document.getElementById('profDirCustom');
+
+            subSelect.innerHTML = '<option value="">请选择具体方向</option>';
+
+            if (catVal === '其他') {
+                subGroup.style.display = 'none';
+                customGroup.style.display = 'block';
+                profile.jobDirection = customInput.value || '';
+            } else if (catVal && dirData[catVal]) {
+                subGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                if (customInput) customInput.value = '';
+                dirData[catVal].subs.forEach(function(s) {
+                    var opt = document.createElement('option');
+                    opt.value = s; opt.textContent = s;
+                    subSelect.appendChild(opt);
+                });
+                profile.jobDirection = '';
+            } else {
+                subGroup.style.display = 'block';
+                customGroup.style.display = 'none';
+                profile.jobDirection = '';
+            }
+            saveProfile();
+        }
+
+        function onDirSubChange() {
+            profile.jobDirection = document.getElementById('profDirSub').value;
+            saveProfile();
+        }
+
+        function updateDirField() {
+            var catVal = document.getElementById('profDirCat').value;
+            var customEl = document.getElementById('profDirCustom');
+            var customVal = customEl ? customEl.value : '';
+            if (catVal === '其他') {
+                profile.jobDirection = customVal;
+            } else if (catVal && document.getElementById('profDirSub').value) {
+                profile.jobDirection = document.getElementById('profDirSub').value;
+            } else {
+                profile.jobDirection = '';
+            }
+        }
+
+        // Safety: also protect direction sub-select
+        document.addEventListener('DOMContentLoaded', function() {
+            var dirSub = document.getElementById('profDirSub');
+            if (dirSub) {
+                dirSub.addEventListener('mousedown', function() {
+                    var catVal = document.getElementById('profDirCat').value;
+                    if (catVal && catVal !== '其他' && this.options.length <= 1) {
+                        onDirCatChange();
+                    }
+                });
+                dirSub.addEventListener('focus', function() {
+                    var catVal = document.getElementById('profDirCat').value;
+                    if (catVal && catVal !== '其他' && this.options.length <= 1) {
+                        onDirCatChange();
+                    }
+                });
+            }
+        });
+
+        // ===== JOB LIBRARY (120+ 岗位，附带招聘链接) =====
+        const jobLibrary = [
+// ==================== 设计类 (Design) ====================
+{ id:1, title:'平面设计师', category:'design', catName:'设计类', company:'字节跳动', city:'北京', salary:'12-20K', link:'https://www.zhipin.com/web/geek/job?query=平面设计师&city=100010000',
+  desc:'负责品牌视觉设计，包括品牌VI、海报、宣传物料、社交媒体配图等，参与创意策划和视觉方案输出。', reqSkills:['PS','AI','ID','品牌设计','版式设计','印刷工艺'], prefSkills:['C4D','AE','插画','动效设计'], reqMajor:['视觉传达设计','平面设计','数字媒体艺术'], expLevel:'1-3年' },
+{ id:2, title:'UI/UX设计师', category:'design', catName:'设计类', company:'阿里巴巴', city:'杭州', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=UI设计师&city=101210100',
+  desc:'负责产品界面设计，输出高保真原型和设计规范，参与用户研究，推动设计落地。', reqSkills:['Figma','Sketch','PS','AI','交互设计','用户研究','设计系统'], prefSkills:['Principle','AE','3D','前端基础'], reqMajor:['视觉传达设计','数字媒体艺术','产品设计'], expLevel:'1-3年' },
+{ id:3, title:'品牌设计师', category:'design', catName:'设计类', company:'腾讯', city:'深圳', salary:'15-30K', link:'https://www.zhipin.com/web/geek/job?query=品牌设计师&city=101280600',
+  desc:'负责品牌整体视觉体系搭建，包括logo设计、VI系统、品牌规范制定，主导品牌升级项目。', reqSkills:['PS','AI','品牌设计','VI设计','字体设计','版式设计'], prefSkills:['C4D','Blender','动态图形','插画'], reqMajor:['视觉传达设计','平面设计'], expLevel:'3-5年' },
+{ id:4, title:'三维建模师', category:'design', catName:'设计类', company:'米哈游', city:'上海', salary:'18-35K', link:'https://www.zhipin.com/web/geek/job?query=三维建模师&city=101020100',
+  desc:'负责游戏/影视三维模型制作，包括角色、场景、道具建模，贴图绘制与材质调节。', reqSkills:['Maya','ZBrush','Substance Painter','Blender','3ds Max','PBR流程'], prefSkills:['UE5','Houdini','Marvelous Designer'], reqMajor:['数字媒体艺术','动画','雕塑'], expLevel:'1-3年' },
+{ id:5, title:'插画师', category:'design', catName:'设计类', company:'网易', city:'广州', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=插画师&city=101280100',
+  desc:'负责游戏/产品插画创作，包括角色立绘、场景插画、宣传海报等商业插画绘制。', reqSkills:['PS','AI','Procreate','手绘','板绘','色彩理论'], prefSkills:['SAI','CSP','3D辅助'], reqMajor:['绘画','视觉传达设计','动画'], expLevel:'应届生' },
+{ id:6, title:'游戏原画师', category:'design', catName:'设计类', company:'莉莉丝', city:'上海', salary:'18-35K', link:'https://www.zhipin.com/web/geek/job?query=游戏原画师&city=101020100',
+  desc:'负责游戏角色/场景概念设计，输出高质量原画设定，把控整体美术风格。', reqSkills:['PS','手绘','角色设计','场景设计','色彩理论','人体结构'], prefSkills:['Blender','3D辅助','故事板'], reqMajor:['绘画','动画','数字媒体艺术'], expLevel:'3-5年' },
+{ id:7, title:'室内设计师', category:'design', catName:'设计类', company:'金螳螂', city:'苏州', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=室内设计师&city=101190400',
+  desc:'负责室内空间设计，包括方案设计、效果图制作、施工图绘制、材料选型。', reqSkills:['CAD','3ds Max','SU','PS','施工图','材料工艺','空间规划'], prefSkills:['Enscape','Lumion','手绘'], reqMajor:['环境设计','室内设计'], expLevel:'1-3年' },
+{ id:8, title:'视觉设计师', category:'design', catName:'设计类', company:'美团', city:'北京', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=视觉设计师&city=100010000',
+  desc:'负责线上线下视觉设计，包括活动专题页、Banner、H5页面、线下物料设计。', reqSkills:['PS','AI','Figma','版式设计','视觉设计','合成'], prefSkills:['C4D','AE','插画'], reqMajor:['视觉传达设计','平面设计'], expLevel:'1-3年' },
+{ id:9, title:'包装设计师', category:'design', catName:'设计类', company:'农夫山泉', city:'杭州', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=包装设计师&city=101210100',
+  desc:'负责产品包装创意设计，包括瓶型、包装盒、礼盒等包装结构及视觉设计。', reqSkills:['PS','AI','包装设计','印刷工艺','刀版','结构设计'], prefSkills:['C4D','犀牛','KeyShot'], reqMajor:['视觉传达设计','产品设计','工艺美术'], expLevel:'1-3年' },
+{ id:10, title:'字体设计师', category:'design', catName:'设计类', company:'方正字库', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=字体设计师&city=100010000',
+  desc:'负责中英文字体设计与开发，包括字库制作、字形优化、品牌定制字体设计。', reqSkills:['Glyphs','FontLab','AI','字体设计','书法','字形'], prefSkills:['PS','西文字体','篆刻'], reqMajor:['视觉传达设计','书法学','平面设计'], expLevel:'1-3年' },
+{ id:11, title:'动态图形设计师', category:'design', catName:'设计类', company:'大疆', city:'深圳', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=动态设计师&city=101280600',
+  desc:'负责品牌动态视觉设计，包括Motion Graphics动画、产品动效、发布会视觉包装。', reqSkills:['AE','C4D','Motion','动态图形','合成','节奏感'], prefSkills:['Blender','Houdini','音乐剪辑'], reqMajor:['视觉传达设计','数字媒体艺术','动画'], expLevel:'3-5年' },
+{ id:12, title:'电商设计师', category:'design', catName:'设计类', company:'完美日记', city:'广州', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=电商设计师&city=101280100',
+  desc:'负责电商平台视觉设计，包括商品详情页、主图、活动专题页、店铺装修设计。', reqSkills:['PS','AI','C4D','电商设计','合成','详情页'], prefSkills:['摄影','PR','Dreamweaver'], reqMajor:['视觉传达设计','数字媒体艺术','平面设计'], expLevel:'1-3年' },
+{ id:13, title:'B端产品设计师', category:'design', catName:'设计类', company:'飞书', city:'北京', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=B端设计师&city=100010000',
+  desc:'负责企业级SaaS产品UI/UX设计，制定B端设计规范和组件库，参与用户调研。', reqSkills:['Figma','Sketch','交互设计','B端设计','组件库','数据可视化'], prefSkills:['前端基础','用户研究','A/B测试'], reqMajor:['视觉传达设计','数字媒体艺术','产品设计'], expLevel:'3-5年' },
+{ id:14, title:'软装设计师', category:'design', catName:'设计类', company:'宜家', city:'上海', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=软装设计师&city=101020100',
+  desc:'负责室内软装搭配设计，包括家具、布艺、灯具、饰品等选型与空间搭配方案。', reqSkills:['CAD','PS','SU','软装搭配','色彩搭配','材料知识'], prefSkills:['手绘','3ds Max','AI'], reqMajor:['环境设计','室内设计'], expLevel:'1-3年' },
+{ id:15, title:'工业设计师', category:'design', catName:'设计类', company:'小米', city:'北京', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=工业设计师&city=100010000',
+  desc:'负责智能硬件产品工业设计，包括外观造型、CMF设计、手板跟进、量产落地。', reqSkills:['犀牛','KeyShot','SolidWorks','手绘','CMF','造型设计'], prefSkills:['Pro/E','Alias','3D打印'], reqMajor:['产品设计','工业设计'], expLevel:'1-3年' },
+{ id:16, title:'游戏UI设计师', category:'design', catName:'设计类', company:'叠纸游戏', city:'上海', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=游戏UI&city=101020100',
+  desc:'负责游戏界面视觉设计，包括HUD、菜单、图标等UI元素，确保与游戏美术风格统一。', reqSkills:['PS','AI','Figma','游戏UI','图标设计','界面设计'], prefSkills:['Unity','UE5','动效'], reqMajor:['视觉传达设计','数字媒体艺术','动画'], expLevel:'1-3年' },
+{ id:17, title:'展览展示设计师', category:'design', catName:'设计类', company:'风语筑', city:'上海', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=展览设计师&city=101020100',
+  desc:'负责展览空间设计，包括展馆规划、展项设计、互动体验设计、施工图输出。', reqSkills:['CAD','3ds Max','SU','PS','展览设计','空间规划'], prefSkills:['UE5','Rhino','TouchDesigner'], reqMajor:['环境设计','艺术与科技','展览设计'], expLevel:'1-3年' },
+{ id:18, title:'珠宝首饰设计师', category:'design', catName:'设计类', company:'周大福', city:'深圳', salary:'12-20K', link:'https://www.zhipin.com/web/geek/job?query=珠宝设计师&city=101280600',
+  desc:'负责珠宝首饰创意设计，包括手绘草图、3D建模、工艺跟进、系列产品开发。', reqSkills:['犀牛','Matrix','手绘','珠宝设计','工艺知识','宝石学'], prefSkills:['ZBrush','KeyShot','Photoshop'], reqMajor:['产品设计','工艺美术','珠宝设计'], expLevel:'1-3年' },
+
+// ==================== 影视类 (Film) ====================
+{ id:19, title:'影视后期剪辑师', category:'film', catName:'影视类', company:'B站', city:'上海', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=后期剪辑&city=101020100',
+  desc:'负责视频后期剪辑制作，包括剪辑、调色、音频处理、字幕包装，确保成片质量和节奏。', reqSkills:['PR','达芬奇','剪辑','调色','音频处理','叙事节奏'], prefSkills:['AE','FCPX','动画'], reqMajor:['影视摄影与制作','广播电视编导','数字媒体艺术'], expLevel:'1-3年' },
+{ id:20, title:'视频特效师', category:'film', catName:'影视类', company:'追光动画', city:'北京', salary:'15-30K', link:'https://www.zhipin.com/web/geek/job?query=特效师&city=100010000',
+  desc:'负责影视特效制作，包括粒子特效、流体模拟、破碎效果、合成等视觉特效。', reqSkills:['Houdini','Nuke','Maya','AE','特效合成','物理模拟'], prefSkills:['UE5','Python','RealFlow'], reqMajor:['数字媒体艺术','动画','影视摄影与制作'], expLevel:'3-5年' },
+{ id:21, title:'动画师', category:'film', catName:'影视类', company:'原力动画', city:'南京', salary:'12-25K', link:'https://www.zhipin.com/web/geek/job?query=动画师&city=101190100',
+  desc:'负责三维角色动画制作，包括动作设计、表情动画、镜头动画，确保动画质量和表现力。', reqSkills:['Maya','3ds Max','Blender','动画原理','角色绑定','运动规律'], prefSkills:['MotionBuilder','UE5'], reqMajor:['动画','数字媒体艺术'], expLevel:'1-3年' },
+{ id:22, title:'摄影师', category:'film', catName:'影视类', company:'视觉中国', city:'北京', salary:'8-18K', link:'https://www.zhipin.com/web/geek/job?query=摄影师&city=100010000',
+  desc:'负责商业摄影项目，包括产品摄影、人像摄影、活动摄影，掌握布光和后期处理。', reqSkills:['摄影','布光','LR','PS','构图','后期处理'], prefSkills:['视频拍摄','无人机'], reqMajor:['摄影','影视摄影与制作','视觉传达设计'], expLevel:'1-3年' },
+{ id:23, title:'调色师', category:'film', catName:'影视类', company:'光线传媒', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=调色师&city=100010000',
+  desc:'负责影视作品的数字调色工作，把控影片整体色彩风格，与导演和摄影指导沟通色彩方案。', reqSkills:['达芬奇','Baselight','调色','色彩理论','监视器校准'], prefSkills:['Nuke','PR','色彩管理'], reqMajor:['影视摄影与制作','数字媒体艺术','摄影'], expLevel:'3-5年' },
+{ id:24, title:'影视编剧', category:'film', catName:'影视类', company:'华策影视', city:'杭州', salary:'12-25K', link:'https://www.zhipin.com/web/geek/job?query=编剧&city=101210100',
+  desc:'负责影视剧/网剧剧本创作，包括故事大纲、人物小传、分集大纲、剧本撰写与修改。', reqSkills:['剧本创作','故事结构','人物塑造','对白写作','文学素养'], prefSkills:['分镜','小说写作','类型片研究'], reqMajor:['戏剧影视文学','广播电视编导','戏剧学'], expLevel:'3-5年' },
+{ id:25, title:'录音师/音频工程师', category:'film', catName:'影视类', company:'中影集团', city:'北京', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=录音师&city=100010000',
+  desc:'负责影视同期录音、后期音频制作，包括对白编辑、音效设计、环境声录制与混音。', reqSkills:['Pro Tools','录音','混音','音频编辑','话筒技术'], prefSkills:['Nuendo','ADR','拟音'], reqMajor:['录音艺术','音乐表演','影视摄影与制作'], expLevel:'1-3年' },
+{ id:26, title:'分镜师', category:'film', catName:'影视类', company:'追光动画', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=分镜师&city=100010000',
+  desc:'负责动画/影视分镜头设计，将剧本转化为视觉化的连续画面，把控镜头语言和节奏。', reqSkills:['分镜','手绘','镜头语言','构图','PS','故事板'], prefSkills:['Maya','Blender','Toon Boom'], reqMajor:['动画','影视摄影与制作','绘画'], expLevel:'1-3年' },
+{ id:27, title:'影视制片助理', category:'film', catName:'影视类', company:'万达影视', city:'北京', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=制片助理&city=100010000',
+  desc:'协助制片人完成影视项目制片工作，包括预算管理、拍摄排期、剧组协调、合同跟进。', reqSkills:['项目管理','沟通协调','预算管理','Office','统筹'], prefSkills:['剪辑基础','法务知识','英语'], reqMajor:['广播电视编导','艺术管理','影视摄影与制作'], expLevel:'应届生' },
+{ id:28, title:'2D动画师', category:'film', catName:'影视类', company:'玄机科技', city:'杭州', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=二维动画师&city=101210100',
+  desc:'负责2D动画制作，包括角色动画、特效动画、场景动画，使用逐帧或骨骼动画技术。', reqSkills:['TVPaint','Toon Boom','Animate','原画','中间帧','动画原理'], prefSkills:['Spine','Live2D','AE'], reqMajor:['动画','绘画','数字媒体艺术'], expLevel:'1-3年' },
+{ id:29, title:'游戏动效设计师', category:'film', catName:'影视类', company:'鹰角网络', city:'上海', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=动效设计师&city=101020100',
+  desc:'负责游戏界面动效设计，包括UI交互动效、技能特效、场景转场动效、粒子效果。', reqSkills:['Unity','UE5','AE','Spine','粒子系统','动效设计'], prefSkills:['Shader','Houdini','C4D'], reqMajor:['数字媒体艺术','动画','视觉传达设计'], expLevel:'1-3年' },
+
+// ==================== 新媒体/传媒类 (Media) ====================
+{ id:30, title:'新媒体运营', category:'media', catName:'新媒体', company:'小红书', city:'上海', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=新媒体运营&city=101020100',
+  desc:'负责新媒体平台内容策划与运营，包括选题策划、内容制作、数据分析、粉丝互动。', reqSkills:['内容策划','文案写作','数据分析','PS','短视频制作','热点追踪'], prefSkills:['PR','AE','直播运营'], reqMajor:['数字媒体艺术','广播电视编导','新闻传播学'], expLevel:'1-3年' },
+{ id:31, title:'短视频编导', category:'media', catName:'新媒体', company:'抖音', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=短视频编导&city=100010000',
+  desc:'负责短视频内容创意策划、脚本撰写、拍摄指导、后期把控，对内容质量和数据负责。', reqSkills:['PR','剪映','脚本撰写','镜头语言','创意策划','热点敏感度'], prefSkills:['AE','达芬奇','摄影'], reqMajor:['广播电视编导','影视摄影与制作','数字媒体艺术'], expLevel:'1-3年' },
+{ id:32, title:'内容策划', category:'media', catName:'新媒体', company:'得物', city:'上海', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=内容策划&city=101020100',
+  desc:'负责潮流内容策划，包括选题策划、专题制作、KOL合作、内容质量把控。', reqSkills:['内容策划','文案写作','PS','数据分析','热点追踪','用户洞察'], prefSkills:['视频剪辑','摄影'], reqMajor:['数字媒体艺术','新闻传播学','艺术管理'], expLevel:'1-3年' },
+{ id:33, title:'自媒体博主运营', category:'media', catName:'新媒体', company:'无忧传媒', city:'杭州', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=达人运营&city=101210100',
+  desc:'负责达人/博主账号运营，包括人设打造、内容规划、粉丝增长、商业化变现。', reqSkills:['内容运营','数据分析','短视频策划','社群运营','商务洽谈'], prefSkills:['PR','直播','摄影'], reqMajor:['数字媒体艺术','广播电视编导','广告学'], expLevel:'1-3年' },
+{ id:34, title:'直播运营', category:'media', catName:'新媒体', company:'交个朋友', city:'杭州', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=直播运营&city=101210100',
+  desc:'负责直播间的日常运营，包括选品排期、直播脚本、流量投放、数据复盘、主播管理。', reqSkills:['直播运营','数据分析','选品','场控','投流'], prefSkills:['PS','视频剪辑','社群'], reqMajor:['数字媒体艺术','广告学','广播电视编导'], expLevel:'1-3年' },
+{ id:35, title:'广告创意策划', category:'media', catName:'新媒体', company:'奥美', city:'上海', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=创意策划&city=101020100',
+  desc:'负责品牌广告创意策划，包括创意概念、传播策略、文案撰写、视觉方向指导。', reqSkills:['创意策划','文案','PPT','品牌策略','提案','消费者洞察'], prefSkills:['PS','视频制作','英语'], reqMajor:['广告学','新闻传播学','视觉传达设计'], expLevel:'1-3年' },
+{ id:36, title:'社群运营', category:'media', catName:'新媒体', company:'网易有道', city:'广州', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=社群运营&city=101280100',
+  desc:'负责微信/企微社群运营，包括用户拉新、活跃维护、转化变现、SOP制定与优化。', reqSkills:['社群运营','用户运营','文案','数据分析','活动策划'], prefSkills:['PS','视频','直播'], reqMajor:['数字媒体艺术','广告学','艺术管理'], expLevel:'应届生' },
+{ id:37, title:'小红书内容运营', category:'media', catName:'新媒体', company:'完美日记', city:'广州', salary:'8-16K', link:'https://www.zhipin.com/web/geek/job?query=小红书运营&city=101280100',
+  desc:'负责品牌小红书账号内容策划与运营，包括笔记创作、图片拍摄、达人合作、数据优化。', reqSkills:['小红书运营','内容策划','摄影','PS','文案','数据分析'], prefSkills:['视频剪辑','直播','SEO'], reqMajor:['数字媒体艺术','广告学','新闻传播学'], expLevel:'应届生' },
+{ id:38, title:'品牌公关专员', category:'media', catName:'新媒体', company:'蓝色光标', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=品牌公关&city=100010000',
+  desc:'负责品牌公关传播，包括媒体关系维护、新闻稿撰写、危机公关处理、品牌活动执行。', reqSkills:['公关','文案','媒体关系','活动策划','PPT','英语'], prefSkills:['PS','视频','舆情监测'], reqMajor:['新闻传播学','广告学','艺术管理'], expLevel:'1-3年' },
+
+// ==================== 艺术教育类 (Education) ====================
+{ id:39, title:'美术教师', category:'education', catName:'艺术教育', company:'童画少儿美术', city:'杭州', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=美术教师&city=101210100',
+  desc:'负责少儿美术课程教学，包括课程研发、课堂教学、学生作品指导、家长沟通。', reqSkills:['手绘','美术教学','课程设计','儿童心理学','沟通能力'], prefSkills:['国画','书法','陶艺'], reqMajor:['美术学','绘画','艺术教育'], expLevel:'应届生' },
+{ id:40, title:'艺术培训讲师', category:'education', catName:'艺术教育', company:'火星时代', city:'北京', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=设计培训讲师&city=100010000',
+  desc:'负责职业技能培训课程讲授，包括设计软件教学、项目实战指导、学员作品点评。', reqSkills:['教学能力','PS','AI','C4D','课程开发','项目经验'], prefSkills:['在线教育','直播教学'], reqMajor:['视觉传达设计','数字媒体艺术','艺术教育'], expLevel:'3-5年' },
+{ id:41, title:'策展助理', category:'education', catName:'艺术教育', company:'UCCA尤伦斯', city:'北京', salary:'8-12K', link:'https://www.zhipin.com/web/geek/job?query=策展助理&city=100010000',
+  desc:'协助策展人完成展览策划与执行，包括艺术家联络、展览文案、布展协调、公共教育项目。', reqSkills:['艺术史','策展','文案写作','英语','PS','沟通协调'], prefSkills:['AI','展览设计','摄影'], reqMajor:['艺术管理','美术学','艺术与科技'], expLevel:'应届生' },
+{ id:42, title:'音乐教师', category:'education', catName:'艺术教育', company:'罗兰数字音乐', city:'上海', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=音乐教师&city=101020100',
+  desc:'负责音乐课程教学（钢琴/吉他/声乐等），包括一对一教学、小组课、音乐会策划、考级指导。', reqSkills:['乐器演奏','音乐教学','乐理','课程设计','沟通能力'], prefSkills:['音乐制作','即兴伴奏','奥尔夫教学法'], reqMajor:['音乐表演','音乐学','音乐教育'], expLevel:'应届生' },
+{ id:43, title:'舞蹈教师', category:'education', catName:'艺术教育', company:'小荧星', city:'上海', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=舞蹈教师&city=101020100',
+  desc:'负责少儿/成人舞蹈课程教学，包括基本功训练、舞蹈编排、演出排练、考级指导。', reqSkills:['舞蹈教学','编舞','基本功','课堂管理','沟通能力'], prefSkills:['芭蕾','中国舞','爵士舞'], reqMajor:['舞蹈表演','舞蹈教育','舞蹈学'], expLevel:'应届生' },
+{ id:44, title:'书法教师', category:'education', catName:'艺术教育', company:'汉翔书法', city:'北京', salary:'8-14K', link:'https://www.zhipin.com/web/geek/job?query=书法教师&city=100010000',
+  desc:'负责书法课程教学（硬笔/软笔），包括课堂教学、学生作品点评、课程研发、家长沟通。', reqSkills:['书法','硬笔','软笔','教学','课程设计'], prefSkills:['国画','篆刻','国学'], reqMajor:['书法学','美术学','艺术教育'], expLevel:'应届生' },
+{ id:45, title:'艺术留学顾问', category:'education', catName:'艺术教育', company:'斯芬克', city:'上海', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=艺术留学顾问&city=101020100',
+  desc:'负责艺术留学咨询与规划，包括院校推荐、作品集指导规划、申请流程辅导、背景提升建议。', reqSkills:['留学咨询','英语','沟通能力','艺术院校知识','作品集评审'], prefSkills:['海外留学背景','多语种','设计背景'], reqMajor:['艺术管理','美术学','艺术教育'], expLevel:'1-3年' },
+{ id:46, title:'博物馆/美术馆教育专员', category:'education', catName:'艺术教育', company:'浦东美术馆', city:'上海', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=美术馆教育&city=101020100',
+  desc:'负责美术馆公共教育项目策划与执行，包括导览、工作坊、讲座、亲子活动、志愿者管理。', reqSkills:['公共教育','活动策划','艺术史','文案','英语','沟通能力'], prefSkills:['PS','策展','儿童教育'], reqMajor:['美术学','艺术管理','艺术教育'], expLevel:'1-3年' },
+{ id:47, title:'戏剧教育老师', category:'education', catName:'艺术教育', company:'开心麻花', city:'北京', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=戏剧教育&city=100010000',
+  desc:'负责儿童/青少年戏剧教育课程教学，包括表演训练、剧目排练、汇报演出指导。', reqSkills:['戏剧教学','表演','课程设计','课堂管理','沟通能力'], prefSkills:['导演','编剧','舞台管理'], reqMajor:['戏剧教育','表演','戏剧学'], expLevel:'应届生' },
+
+// ==================== 演艺类 (Performing) ====================
+{ id:48, title:'舞台美术设计师', category:'performing', catName:'演艺类', company:'国家大剧院', city:'北京', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=舞美设计&city=100010000',
+  desc:'负责舞台美术设计，包括舞台布景、灯光设计、道具设计，参与剧目创排全过程。', reqSkills:['舞台设计','3ds Max','SketchUp','CAD','灯光设计','材料工艺'], prefSkills:['UE5','投影映射','互动装置'], reqMajor:['戏剧影视美术设计','环境设计','艺术与科技'], expLevel:'1-3年' },
+{ id:49, title:'服装设计师', category:'performing', catName:'演艺类', company:'太平鸟', city:'宁波', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=服装设计师&city=101210400',
+  desc:'负责服装设计开发，包括趋势分析、款式设计、面料选择、样衣跟进、系列规划。', reqSkills:['AI','PS','服装制版','面料知识','趋势分析','手绘'], prefSkills:['CLO 3D','立裁','摄影'], reqMajor:['服装与服饰设计'], expLevel:'1-3年' },
+{ id:50, title:'音乐制作人', category:'performing', catName:'演艺类', company:'网易云音乐', city:'杭州', salary:'12-25K', link:'https://www.zhipin.com/web/geek/job?query=音乐制作人&city=101210100',
+  desc:'负责音乐制作全流程，包括作曲、编曲、录音、混音、母带处理。', reqSkills:['Logic Pro','Cubase','编曲','混音','作曲','录音'], prefSkills:['Pro Tools','Ableton Live','乐器演奏'], reqMajor:['音乐表演','录音艺术','作曲与作曲技术理论'], expLevel:'1-3年' },
+{ id:51, title:'灯光设计师', category:'performing', catName:'演艺类', company:'大丰实业', city:'杭州', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=灯光设计师&city=101210100',
+  desc:'负责演出/活动/文旅项目的灯光设计，包括灯光方案、控台编程、现场执行、效果调试。', reqSkills:['灯光设计','MA控台','GrandMA','DMX','电气知识','CAD'], prefSkills:['WYSIWYG','Vectorworks','UE5'], reqMajor:['戏剧影视美术设计','艺术与科技','舞台美术设计'], expLevel:'3-5年' },
+{ id:52, title:'音响师', category:'performing', catName:'演艺类', company:'摩登天空', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=音响师&city=100010000',
+  desc:'负责音乐节/演出/活动音响系统搭建与调音，包括PA调音、Monitor调音、系统调试。', reqSkills:['调音','音响系统','音频处理','数字调音台','声学'], prefSkills:['录音','系统集成','射频'], reqMajor:['录音艺术','音乐表演','艺术与科技'], expLevel:'3-5年' },
+{ id:53, title:'演出策划/制作人', category:'performing', catName:'演艺类', company:'笑果文化', city:'上海', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=演出策划&city=101020100',
+  desc:'负责演出项目的策划与执行，包括剧目选择、演员沟通、票务对接、现场统筹、宣传配合。', reqSkills:['演出策划','项目管理','沟通协调','预算管理','文案'], prefSkills:['PS','视频','英语'], reqMajor:['艺术管理','戏剧学','广播电视编导'], expLevel:'1-3年' },
+{ id:54, title:'化妆造型师', category:'performing', catName:'演艺类', company:'东田造型', city:'北京', salary:'8-18K', link:'https://www.zhipin.com/web/geek/job?query=化妆师&city=100010000',
+  desc:'负责影视/舞台/时尚化妆造型，包括人物造型设计、特效化妆、发型设计、跟妆。', reqSkills:['化妆','造型设计','发型','特效化妆','色彩理论','PS'], prefSkills:['雕塑','模具制作','摄影'], reqMajor:['戏剧影视美术设计','服装与服饰设计'], expLevel:'1-3年' },
+{ id:55, title:'配音演员/声优', category:'performing', catName:'演艺类', company:'729声工场', city:'北京', salary:'8-18K', link:'https://www.zhipin.com/web/geek/job?query=配音演员&city=100010000',
+  desc:'负责动画/游戏/影视剧配音工作，包括角色配音、旁白录制、广告配音等。', reqSkills:['配音','声音塑造','台词','表演','录音'], prefSkills:['唱歌','外语','拟音'], reqMajor:['播音与主持艺术','表演','音乐表演'], expLevel:'应届生' },
+{ id:56, title:'综艺节目编导', category:'performing', catName:'演艺类', company:'湖南卫视', city:'长沙', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=综艺编导&city=101250100',
+  desc:'负责综艺节目策划与制作，包括节目创意、台本撰写、现场执行、后期剪辑指导。', reqSkills:['节目策划','台本写作','现场执行','剪辑思维','团队协作'], prefSkills:['PR','AE','摄影'], reqMajor:['广播电视编导','戏剧影视文学','播音与主持艺术'], expLevel:'1-3年' },
+{ id:57, title:'模特', category:'performing', catName:'演艺类', company:'龙腾精英', city:'上海', salary:'8-20K', link:'https://www.zhipin.com/web/geek/job?query=模特&city=101020100',
+  desc:'参与品牌广告拍摄、T台走秀、电商拍摄、直播展示等商业模特工作。', reqSkills:['台步','镜头感','形体','表现力','表情管理'], prefSkills:['舞蹈','表演','外语'], reqMajor:['服装表演','舞蹈表演','表演'], expLevel:'应届生' },
+
+// ==================== 游戏类 (Game) ====================
+{ id:58, title:'游戏场景原画师', category:'design', catName:'设计类', company:'网易游戏', city:'广州', salary:'18-35K', link:'https://www.zhipin.com/web/geek/job?query=场景原画&city=101280100',
+  desc:'负责游戏场景概念设计与原画绘制，把控场景整体美术风格与氛围表现。', reqSkills:['PS','场景设计','概念设计','色彩理论','光影','透视'], prefSkills:['Blender','3D辅助','故事板'], reqMajor:['绘画','动画','数字媒体艺术'], expLevel:'3-5年' },
+{ id:59, title:'游戏特效师', category:'film', catName:'影视类', company:'腾讯游戏', city:'深圳', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=游戏特效&city=101280600',
+  desc:'负责游戏战斗/技能/场景特效设计与制作，使用Unity/UE引擎实现高品质视觉效果。', reqSkills:['Unity','UE5','特效设计','Shader','粒子系统','Houdini'], prefSkills:['Maya','AE','材质'], reqMajor:['数字媒体艺术','动画','艺术与科技'], expLevel:'3-5年' },
+{ id:60, title:'游戏技术美术(TA)', category:'design', catName:'设计类', company:'米哈游', city:'上海', salary:'25-40K', link:'https://www.zhipin.com/web/geek/job?query=技术美术&city=101020100',
+  desc:'负责衔接美术与程序，开发Shader、制作工具、优化渲染管线、制定美术规范。', reqSkills:['Shader','HLSL','GLSL','Unity','UE5','Python','渲染'], prefSkills:['Houdini','Substance Designer','C++'], reqMajor:['数字媒体艺术','艺术与科技','动画'], expLevel:'3-5年' },
+{ id:61, title:'游戏动作设计师', category:'film', catName:'影视类', company:'鹰角网络', city:'上海', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=游戏动作&city=101020100',
+  desc:'负责游戏角色/怪物动作设计与制作，包括战斗动作、技能表现、表情动画、过场动画。', reqSkills:['Maya','3ds Max','MotionBuilder','动画原理','动作设计'], prefSkills:['UE5','Unity','动捕'], reqMajor:['动画','数字媒体艺术'], expLevel:'1-3年' },
+{ id:62, title:'游戏策划（美术方向）', category:'design', catName:'设计类', company:'叠纸游戏', city:'上海', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=游戏策划&city=101020100',
+  desc:'负责游戏美术需求策划，包括美术风格定义、外包管理、资源整合、美术效果验收。', reqSkills:['游戏策划','美术鉴赏','项目管理','沟通能力','文档撰写'], prefSkills:['PS','Unity','UE5'], reqMajor:['数字媒体艺术','动画','艺术管理'], expLevel:'1-3年' },
+
+// ==================== 音乐舞蹈类 (Music & Dance) ====================
+{ id:63, title:'编曲师', category:'performing', catName:'演艺类', company:'太合音乐', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=编曲&city=100010000',
+  desc:'负责音乐编曲制作，包括和声编写、配器、音色设计、Demo制作、成品输出。', reqSkills:['Logic Pro','Cubase','编曲','和声学','配器','音色设计'], prefSkills:['Pro Tools','Ableton Live','键盘'], reqMajor:['作曲与作曲技术理论','音乐制作','音乐表演'], expLevel:'1-3年' },
+{ id:64, title:'音效设计师', category:'performing', catName:'演艺类', company:'网易游戏', city:'杭州', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=音效设计&city=101210100',
+  desc:'负责游戏/影视音效设计制作，包括环境音效、UI音效、技能音效、拟音录制。', reqSkills:['音效设计','Pro Tools','拟音','合成器','采样','音频编辑'], prefSkills:['Wwise','FMOD','Unity'], reqMajor:['录音艺术','音乐制作','音乐表演'], expLevel:'1-3年' },
+{ id:65, title:'演唱会/音乐节策划', category:'performing', catName:'演艺类', company:'摩登天空', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=音乐节策划&city=100010000',
+  desc:'负责音乐节/演唱会项目策划与执行，包括艺人邀约、场地对接、报批、现场管理。', reqSkills:['活动策划','项目管理','沟通协调','预算管理','音乐行业知识'], prefSkills:['PS','视频','英语'], reqMajor:['艺术管理','音乐表演','广播电视编导'], expLevel:'1-3年' },
+{ id:66, title:'街舞老师/编舞师', category:'education', catName:'艺术教育', company:'舞邦', city:'成都', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=街舞老师&city=101270100',
+  desc:'负责街舞课程教学及编舞，包括Hiphop/Jazz/Breaking等舞种教学、齐舞编排、演出编排。', reqSkills:['街舞','编舞','教学','课堂管理','编排能力'], prefSkills:['现代舞','爵士舞','视频拍摄'], reqMajor:['舞蹈表演','舞蹈编导','舞蹈学'], expLevel:'应届生' },
+{ id:67, title:'音乐治疗师', category:'education', catName:'艺术教育', company:'特殊教育机构', city:'北京', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=音乐治疗&city=100010000',
+  desc:'运用音乐治疗方法为特殊儿童/康复人群提供治疗服务，制定个性化方案并跟踪效果。', reqSkills:['音乐治疗','心理学','乐器演奏','评估','方案设计'], prefSkills:['特殊教育','康复医学','科研'], reqMajor:['音乐治疗','音乐学','音乐教育'], expLevel:'应届生' },
+
+// ==================== 传统文化/工艺类 (Traditional) ====================
+{ id:68, title:'文创产品设计师', category:'other', catName:'其他', company:'故宫文创', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=文创设计&city=100010000',
+  desc:'负责文创产品设计开发，将传统文化元素转化为现代设计产品。', reqSkills:['PS','AI','产品设计','插画','传统文化','工艺知识'], prefSkills:['C4D','犀牛','包装设计'], reqMajor:['产品设计','工艺美术','视觉传达设计'], expLevel:'1-3年' },
+{ id:69, title:'交互装置设计师', category:'other', catName:'其他', company:'teamLab', city:'上海', salary:'15-30K', link:'https://www.zhipin.com/web/geek/job?query=装置设计&city=101020100',
+  desc:'负责新媒体互动装置设计，包括交互体验设计、传感器应用、视觉内容制作。', reqSkills:['TouchDesigner','Arduino','Processing','交互设计','投影映射'], prefSkills:['Unity','MadMapper','创意编程'], reqMajor:['艺术与科技','数字媒体艺术','交互设计'], expLevel:'3-5年' },
+{ id:70, title:'陶瓷/陶艺设计师', category:'other', catName:'其他', company:'景德镇陶文旅', city:'景德镇', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=陶艺&city=101240800',
+  desc:'负责陶瓷产品设计与制作，包括造型设计、釉色研发、工艺创新、产品系列开发。', reqSkills:['陶艺','拉坯','釉料','陶瓷工艺','手绘','3D建模'], prefSkills:['犀牛','PS','烧成技术'], reqMajor:['工艺美术','陶艺','雕塑'], expLevel:'1-3年' },
+{ id:71, title:'非遗传承/工艺师', category:'other', catName:'其他', company:'老凤祥', city:'上海', salary:'8-18K', link:'https://www.zhipin.com/web/geek/job?query=非遗&city=101020100',
+  desc:'负责传统工艺（金银细工/景泰蓝/刺绣等）的设计制作与传承创新，参与产品研发。', reqSkills:['传统工艺','手工艺','设计','文化传承','材料工艺'], prefSkills:['PS','AI','教学'], reqMajor:['工艺美术','雕塑','漆艺'], expLevel:'3-5年' },
+{ id:72, title:'国画艺术家助理', category:'other', catName:'其他', company:'荣宝斋', city:'北京', salary:'6-12K', link:'https://www.zhipin.com/web/geek/job?query=国画&city=100010000',
+  desc:'协助国画艺术家进行创作、展览策划、作品管理、客户沟通、社交媒体运营。', reqSkills:['国画','书法','艺术史','PS','文案','沟通能力'], prefSkills:['摄影','策展','装裱'], reqMajor:['绘画','美术学','书法学'], expLevel:'应届生' },
+
+// ==================== 建筑设计/景观类 ====================
+{ id:73, title:'景观设计师', category:'design', catName:'设计类', company:'奥雅设计', city:'深圳', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=景观设计师&city=101280600',
+  desc:'负责景观方案设计，包括概念设计、扩初设计、施工图、植物配置、现场配合。', reqSkills:['CAD','SU','Lumion','PS','景观设计','植物知识'], prefSkills:['犀牛','Grasshopper','GIS'], reqMajor:['环境设计','景观设计','建筑学'], expLevel:'1-3年' },
+{ id:74, title:'建筑可视化设计师', category:'design', catName:'设计类', company:'SAN', city:'上海', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=建筑可视化&city=101020100',
+  desc:'负责建筑效果图/动画制作，包括建筑渲染、漫游动画、VR展示、后期合成。', reqSkills:['3ds Max','V-Ray','Corona','PS','Lumion','建筑表现'], prefSkills:['UE5','Blender','Twinmotion'], reqMajor:['环境设计','建筑学','数字媒体艺术'], expLevel:'1-3年' },
+
+// ==================== 自由职业/创业类 ====================
+{ id:75, title:'自由插画师', category:'design', catName:'设计类', company:'自由职业', city:'远程', salary:'按项目计', link:'https://www.zhipin.com/web/geek/job?query=自由插画师',
+  desc:'承接商业插画项目，包括书籍插画、包装插画、IP设计、品牌插画、社媒配图等。', reqSkills:['PS','AI','Procreate','手绘','插画风格多样','沟通能力'], prefSkills:['SAI','CSP','运营'], reqMajor:['绘画','视觉传达设计','动画'], expLevel:'应届生' },
+{ id:76, title:'独立游戏开发者（美术）', category:'design', catName:'设计类', company:'独立开发', city:'远程', salary:'按项目计', link:'https://www.zhipin.com/web/geek/job?query=独立游戏',
+  desc:'负责独立游戏的美术全流程，包括角色、场景、UI、动效等视觉内容的创作。', reqSkills:['PS','Unity','像素画/手绘','游戏设计','全流程'], prefSkills:['Godot','Aseprite','音乐'], reqMajor:['数字媒体艺术','动画','视觉传达设计'], expLevel:'应届生' },
+
+// ==================== 跨领域/新兴职业 ====================
+{ id:77, title:'AI绘画/AIGC设计师', category:'design', catName:'设计类', company:'美团', city:'北京', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=AIGC设计师&city=100010000',
+  desc:'运用AI绘画工具进行设计创作，包括Midjourney/Stable Diffusion模型训练与调优、工作流搭建。', reqSkills:['Midjourney','Stable Diffusion','PS','AI绘画','Prompt工程','LoRA训练'], prefSkills:['ComfyUI','ControlNet','Python'], reqMajor:['数字媒体艺术','视觉传达设计','艺术与科技'], expLevel:'1-3年' },
+{ id:78, title:'XR/AR/VR设计师', category:'other', catName:'其他', company:'Pico', city:'北京', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=VR设计师&city=100010000',
+  desc:'负责VR/AR/MR产品的交互与视觉设计，包括空间UI设计、3D交互、沉浸式体验设计。', reqSkills:['Unity','UE5','3D建模','交互设计','空间设计','UX'], prefSkills:['C#','Blender','Shader'], reqMajor:['艺术与科技','数字媒体艺术','交互设计'], expLevel:'1-3年' },
+{ id:79, title:'数字孪生可视化设计师', category:'other', catName:'其他', company:'51WORLD', city:'北京', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=数字孪生&city=100010000',
+  desc:'负责数字孪生/智慧城市可视化设计，包括3D场景搭建、数据可视化大屏、交互体验。', reqSkills:['UE5','Unity','3ds Max','数据可视化','UI设计','GIS'], prefSkills:['Cesium','Blender','Python'], reqMajor:['艺术与科技','数字媒体艺术','环境设计'], expLevel:'1-3年' },
+{ id:80, title:'NFT/数字藏品设计师', category:'design', catName:'设计类', company:'鲸探', city:'杭州', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=数字藏品&city=101210100',
+  desc:'负责数字藏品/数字艺术品的设计创作，包括3D建模、像素艺术、生成艺术、动态视觉。', reqSkills:['Blender','C4D','AI绘画','3D建模','创意设计','Web3'], prefSkills:['Processing','p5.js','TouchDesigner'], reqMajor:['数字媒体艺术','视觉传达设计','艺术与科技'], expLevel:'1-3年' },
+
+// ==================== 实习/初级岗位 ====================
+{ id:81, title:'设计实习生', category:'design', catName:'设计类', company:'字节跳动', city:'北京', salary:'150-250/天', link:'https://www.zhipin.com/web/geek/job?query=设计实习生&city=100010000',
+  desc:'协助设计师完成日常设计工作，包括素材收集、排版、修图、简单设计任务执行。', reqSkills:['PS','AI','Figma','设计基础','学习能力'], prefSkills:['C4D','手绘','动效'], reqMajor:['视觉传达设计','数字媒体艺术','平面设计'], expLevel:'应届生' },
+{ id:82, title:'视频剪辑实习生', category:'film', catName:'影视类', company:'B站', city:'上海', salary:'150-200/天', link:'https://www.zhipin.com/web/geek/job?query=剪辑实习生&city=101020100',
+  desc:'协助视频团队进行素材整理、粗剪、字幕制作、简单包装，学习专业剪辑流程。', reqSkills:['PR','剪映','剪辑基础','节奏感','学习能力'], prefSkills:['AE','达芬奇','摄影'], reqMajor:['影视摄影与制作','广播电视编导','数字媒体艺术'], expLevel:'应届生' },
+{ id:83, title:'新媒体运营实习生', category:'media', catName:'新媒体', company:'小红书', city:'上海', salary:'120-180/天', link:'https://www.zhipin.com/web/geek/job?query=新媒体实习生&city=101020100',
+  desc:'协助新媒体账号日常运营，包括内容创作、素材收集、数据整理、用户互动、热点追踪。', reqSkills:['文案','PS','热点追踪','学习能力','短视频'], prefSkills:['摄影','PR','数据分析'], reqMajor:['数字媒体艺术','新闻传播学','广告学'], expLevel:'应届生' },
+
+// ==================== 中高级岗位 ====================
+{ id:84, title:'设计总监', category:'design', catName:'设计类', company:'腾讯', city:'深圳', salary:'40-60K', link:'https://www.zhipin.com/web/geek/job?query=设计总监&city=101280600',
+  desc:'负责设计团队管理与项目把控，制定设计策略和规范，推动设计创新与团队成长。', reqSkills:['设计管理','品牌策略','团队管理','视觉设计','沟通能力','项目管理'], prefSkills:['产品思维','商业洞察','英语'], reqMajor:['视觉传达设计','平面设计','数字媒体艺术'], expLevel:'5年以上' },
+{ id:85, title:'创意总监', category:'media', catName:'新媒体', company:'奥美', city:'上海', salary:'40-60K', link:'https://www.zhipin.com/web/geek/job?query=创意总监&city=101020100',
+  desc:'负责创意团队管理，把控品牌创意方向，主导大型Campaign创意策略与执行。', reqSkills:['创意策略','团队管理','品牌','提案','整合营销','艺术鉴赏'], prefSkills:['国际视野','英语','影视制作'], reqMajor:['广告学','视觉传达设计','新闻传播学'], expLevel:'5年以上' },
+{ id:86, title:'资深场景模型师', category:'design', catName:'设计类', company:'游戏科学', city:'杭州', salary:'25-40K', link:'https://www.zhipin.com/web/geek/job?query=场景模型&city=101210100',
+  desc:'负责3A级游戏场景的高精度建模与材质制作，把控场景整体美术品质。', reqSkills:['Maya','ZBrush','Substance Painter','UE5','高模','PBR流程'], prefSkills:['Houdini','SpeedTree','World Machine'], reqMajor:['数字媒体艺术','动画','雕塑'], expLevel:'3-5年' },
+
+// ==================== 更多细分岗位 ====================
+{ id:87, title:'儿童绘本插画师', category:'design', catName:'设计类', company:'蒲蒲兰', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=绘本&city=100010000',
+  desc:'负责儿童绘本/图画书的插画创作，包括角色设定、场景绘制、分页构图、封面设计。', reqSkills:['手绘','PS','AI','儿童插画','故事板','色彩'], prefSkills:['水彩','彩铅','绘本出版'], reqMajor:['绘画','视觉传达设计','动画'], expLevel:'1-3年' },
+{ id:88, title:'漫画主笔', category:'design', catName:'设计类', company:'快看漫画', city:'北京', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=漫画主笔&city=100010000',
+  desc:'负责漫画作品的主笔创作，包括分镜、线稿、上色指导、剧情节奏把控。', reqSkills:['CSP','PS','SAI','漫画分镜','人体结构','叙事能力'], prefSkills:['编剧','3D辅助','动画'], reqMajor:['绘画','动画','视觉传达设计'], expLevel:'1-3年' },
+{ id:89, title:'纹身师/刺青师', category:'design', catName:'设计类', company:'独立工作室', city:'全国', salary:'按单计费', link:'https://www.zhipin.com/web/geek/job?query=纹身师',
+  desc:'根据客户需求进行纹身图案设计，完成纹身操作，维护工作环境卫生安全。', reqSkills:['手绘','PS','图案设计','纹身技术','卫生安全','沟通能力'], prefSkills:['AI','插画','风格多样化'], reqMajor:['绘画','视觉传达设计','工艺美术'], expLevel:'3-5年' },
+{ id:90, title:'VJ/视觉设计师（演出）', category:'performing', catName:'演艺类', company:'摩登天空', city:'北京', salary:'12-20K', link:'https://www.zhipin.com/web/geek/job?query=VJ&city=100010000',
+  desc:'负责音乐节/演出/活动的实时视觉设计，包括VJ素材制作、现场视觉操控、投影映射。', reqSkills:['Resolume','TouchDesigner','AE','C4D','实时渲染','节奏感'], prefSkills:['MadMapper','Notch','Blender'], reqMajor:['数字媒体艺术','艺术与科技','视觉传达设计'], expLevel:'1-3年' },
+{ id:91, title:'无人机航拍摄影师', category:'film', catName:'影视类', company:'大疆', city:'深圳', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=航拍&city=101280600',
+  desc:'负责影视/广告/活动航拍，包括飞行规划、空中拍摄、素材后期处理。', reqSkills:['航拍','无人机操作','摄影','构图','PR','达芬奇'], prefSkills:['FPV','3D建模','测绘'], reqMajor:['摄影','影视摄影与制作','数字媒体艺术'], expLevel:'1-3年' },
+{ id:92, title:'数字人/虚拟偶像制作', category:'other', catName:'其他', company:'魔珐科技', city:'上海', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=虚拟人&city=101020100',
+  desc:'负责虚拟数字人/虚拟偶像的美术制作，包括角色建模、材质、绑定、表情BlendShape。', reqSkills:['Maya','ZBrush','Blender','UE5','角色建模','绑定','Metahuman'], prefSkills:['MotionBuilder','动捕','Substance'], reqMajor:['数字媒体艺术','动画','雕塑'], expLevel:'3-5年' },
+{ id:93, title:'潮玩/盲盒设计师', category:'design', catName:'设计类', company:'泡泡玛特', city:'北京', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=潮玩设计&city=100010000',
+  desc:'负责潮玩/盲盒IP产品设计，包括角色造型设计、涂装方案、系列企划、生产跟进。', reqSkills:['ZBrush','犀牛','KeyShot','IP设计','涂装设计','潮流趋势'], prefSkills:['手绘','PS','AI','插画'], reqMajor:['产品设计','雕塑','视觉传达设计'], expLevel:'1-3年' },
+{ id:94, title:'有声书/广播剧制作', category:'performing', catName:'演艺类', company:'喜马拉雅', city:'上海', salary:'12-20K', link:'https://www.zhipin.com/web/geek/job?query=广播剧&city=101020100',
+  desc:'负责有声书/广播剧的制作，包括录音指导、音频后期、音效设计、混音输出。', reqSkills:['Pro Tools','录音','音频编辑','混音','音效设计','导演'], prefSkills:['配音','编剧','AU'], reqMajor:['录音艺术','播音与主持艺术','音乐表演'], expLevel:'1-3年' },
+{ id:95, title:'UI/UX设计实习生', category:'design', catName:'设计类', company:'阿里巴巴', city:'杭州', salary:'200-300/天', link:'https://www.zhipin.com/web/geek/job?query=UI实习生&city=101210100',
+  desc:'参与产品界面设计，在导师指导下完成设计需求，学习设计系统与规范。', reqSkills:['Figma','Sketch','PS','设计基础','学习能力'], prefSkills:['AE','交互设计','前端基础'], reqMajor:['视觉传达设计','数字媒体艺术','产品设计'], expLevel:'应届生' },
+{ id:96, title:'艺术公众号编辑', category:'media', catName:'新媒体', company:'一条', city:'上海', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=艺术编辑&city=101020100',
+  desc:'负责艺术/设计类公众号内容策划与撰写，包括艺术家采访、展览报道、深度专题、排版发布。', reqSkills:['文案写作','艺术史','采访','排版','PS','热点追踪'], prefSkills:['摄影','视频','英语'], reqMajor:['美术学','艺术管理','新闻传播学'], expLevel:'1-3年' },
+{ id:97, title:'商业摄影师（电商）', category:'film', catName:'影视类', company:'如涵', city:'杭州', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=电商摄影&city=101210100',
+  desc:'负责电商产品/模特拍摄，包括场景搭建、布光、拍摄、选片、后期修图全流程。', reqSkills:['摄影','布光','LR','PS','修图','场景搭建'], prefSkills:['视频拍摄','无人机','色彩管理'], reqMajor:['摄影','影视摄影与制作','视觉传达设计'], expLevel:'1-3年' },
+{ id:98, title:'文旅演艺策划', category:'performing', catName:'演艺类', company:'宋城演艺', city:'杭州', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=演艺策划&city=101210100',
+  desc:'负责文旅景区演艺项目策划，包括演出创意、剧本编写、舞美方案、运营模式设计。', reqSkills:['演出策划','创意','剧本','项目管理','舞美知识','文化研究'], prefSkills:['导演','灯光','音乐'], reqMajor:['戏剧学','艺术管理','广播电视编导'], expLevel:'3-5年' },
+{ id:99, title:'艺术策展人', category:'education', catName:'艺术教育', company:'龙美术馆', city:'上海', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=策展人&city=101020100',
+  desc:'负责美术馆展览的整体策划与执行，包括学术研究、艺术家沟通、展览方案、出版物编辑。', reqSkills:['策展','艺术史','学术研究','英语','项目管理','文案'], prefSkills:['出版','公共教育','国际交流'], reqMajor:['艺术史论','美术学','艺术管理'], expLevel:'3-5年' },
+{ id:100, title:'影视服装造型师', category:'performing', catName:'演艺类', company:'正午阳光', city:'北京', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=影视服装&city=100010000',
+  desc:'负责影视剧服装造型设计，根据剧本和角色设计服装方案、选料、监制、跟组。', reqSkills:['服装设计','服装史','面料知识','造型设计','PS','AI'], prefSkills:['手绘','立裁','化妆'], reqMajor:['服装与服饰设计','戏剧影视美术设计'], expLevel:'1-3年' },
+{ id:101, title:'综艺后期包装师', category:'film', catName:'影视类', company:'灿星制作', city:'上海', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=综艺包装&city=101020100',
+  desc:'负责综艺节目的花字、特效、动画包装制作，提升节目趣味性和视觉效果。', reqSkills:['AE','PS','AI','花字设计','动画','综艺感'], prefSkills:['C4D','PR','Mocha'], reqMajor:['数字媒体艺术','视觉传达设计','动画'], expLevel:'1-3年' },
+{ id:102, title:'品牌空间设计师', category:'design', catName:'设计类', company:'李宁', city:'北京', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=空间设计&city=100010000',
+  desc:'负责品牌零售空间/快闪店/展厅设计，包括空间概念、效果图、施工图、道具设计。', reqSkills:['CAD','3ds Max','SU','PS','空间设计','材料工艺'], prefSkills:['犀牛','Enscape','VRay'], reqMajor:['环境设计','室内设计','艺术与科技'], expLevel:'3-5年' },
+{ id:103, title:'艺术版权运营', category:'other', catName:'其他', company:'视觉中国', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=版权运营&city=100010000',
+  desc:'负责艺术作品/摄影作品版权运营，包括版权授权、商务合作、维权管理、IP商业化。', reqSkills:['版权法','商务洽谈','艺术鉴赏','合同','英语','数据分析'], prefSkills:['摄影','设计','法律'], reqMajor:['艺术管理','美术学','文化产业管理'], expLevel:'1-3年' },
+{ id:104, title:'互动投影设计师', category:'other', catName:'其他', company:'光影百年', city:'深圳', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=投影设计&city=101280600',
+  desc:'负责Mapping投影秀/沉浸式空间设计，包括3D Mapping、交互设计、视觉内容制作。', reqSkills:['TouchDesigner','MadMapper','AE','C4D','投影映射','交互设计'], prefSkills:['Resolume','Notch','Unity'], reqMajor:['艺术与科技','数字媒体艺术','环境设计'], expLevel:'1-3年' },
+{ id:105, title:'潮牌/街头服饰设计师', category:'performing', catName:'演艺类', company:'INXX', city:'杭州', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=潮牌设计&city=101210100',
+  desc:'负责潮牌服饰设计，包括街头风格款式设计、图案设计、印花工艺、系列企划。', reqSkills:['AI','PS','服装设计','图案设计','街头文化','印花工艺'], prefSkills:['手绘','摄影','潮流趋势'], reqMajor:['服装与服饰设计','视觉传达设计'], expLevel:'1-3年' },
+{ id:106, title:'美陈设计师', category:'design', catName:'设计类', company:'壹方城', city:'深圳', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=美陈设计&city=101280600',
+  desc:'负责商业综合体美陈设计，包括节日美陈、主题装置、DP点设计、氛围营造。', reqSkills:['3ds Max','CAD','SU','PS','美陈设计','材料工艺'], prefSkills:['犀牛','手绘','Lumion'], reqMajor:['环境设计','雕塑','艺术与科技'], expLevel:'1-3年' },
+{ id:107, title:'电竞赛事视觉设计', category:'design', catName:'设计类', company:'腾竞体育', city:'上海', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=电竞设计&city=101020100',
+  desc:'负责电竞赛事视觉设计，包括主视觉KV、舞台视觉、直播包装、战队视觉体系。', reqSkills:['PS','AI','C4D','AE','视觉设计','电竞'], prefSkills:['Blender','UE5','3D'], reqMajor:['视觉传达设计','数字媒体艺术','动画'], expLevel:'1-3年' },
+{ id:108, title:'雕塑/公共艺术设计师', category:'other', catName:'其他', company:'公共艺术机构', city:'北京', salary:'10-20K', link:'https://www.zhipin.com/web/geek/job?query=公共艺术&city=100010000',
+  desc:'负责城市公共艺术/雕塑项目设计，包括方案设计、3D建模、施工图、工厂监制、现场安装。', reqSkills:['ZBrush','犀牛','3ds Max','雕塑','公共艺术','材料工艺'], prefSkills:['CAD','手绘','焊接'], reqMajor:['雕塑','公共艺术','环境设计'], expLevel:'3-5年' },
+{ id:109, title:'短视频演员/达人', category:'performing', catName:'演艺类', company:'无忧传媒', city:'杭州', salary:'8-20K', link:'https://www.zhipin.com/web/geek/job?query=短视频达人&city=101210100',
+  desc:'负责短视频出镜表演，根据脚本完成拍摄，配合运营完成账号内容输出。', reqSkills:['表演','镜头感','表现力','沟通能力','才艺'], prefSkills:['舞蹈','音乐','剪辑'], reqMajor:['表演','播音与主持艺术','舞蹈表演'], expLevel:'应届生' },
+{ id:110, title:'Web/前端设计师', category:'design', catName:'设计类', company:'小红书', city:'上海', salary:'18-30K', link:'https://www.zhipin.com/web/geek/job?query=前端设计师&city=101020100',
+  desc:'负责网页/H5页面视觉设计与前端实现，包括响应式布局、动效开发、设计还原。', reqSkills:['Figma','HTML','CSS','JavaScript','响应式','动效'], prefSkills:['React','Vue','Three.js'], reqMajor:['数字媒体艺术','视觉传达设计','艺术与科技'], expLevel:'1-3年' },
+{ id:111, title:'艺术品拍卖专员', category:'other', catName:'其他', company:'嘉德拍卖', city:'北京', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=拍卖&city=100010000',
+  desc:'负责艺术品拍卖相关工作，包括拍品征集、图录撰写、客户维护、预展布置、拍卖执行。', reqSkills:['艺术史','拍卖','客户关系','文案','英语','PS'], prefSkills:['鉴定','摄影','策展'], reqMajor:['艺术管理','美术学','艺术史论'], expLevel:'1-3年' },
+{ id:112, title:'短视频运营经理', category:'media', catName:'新媒体', company:'抖音', city:'北京', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=短视频运营经理&city=100010000',
+  desc:'负责短视频账号矩阵运营，制定内容策略，带领团队完成涨粉和变现目标。', reqSkills:['短视频运营','团队管理','内容策略','数据分析','投流','商务'], prefSkills:['PR','直播','电商'], reqMajor:['数字媒体艺术','广播电视编导','广告学'], expLevel:'3-5年' },
+{ id:113, title:'音乐版权运营', category:'performing', catName:'演艺类', company:'腾讯音乐', city:'深圳', salary:'15-25K', link:'https://www.zhipin.com/web/geek/job?query=音乐版权&city=101280600',
+  desc:'负责音乐版权运营管理，包括版权采购、授权合作、版权监控、数据分析、商务谈判。', reqSkills:['版权法','音乐行业','商务洽谈','数据分析','英语','合同'], prefSkills:['音乐制作','法务','日语/韩语'], reqMajor:['艺术管理','音乐学','文化产业管理'], expLevel:'1-3年' },
+{ id:114, title:'宠物摄影师', category:'film', catName:'影视类', company:'宠物行业', city:'成都', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=宠物摄影&city=101270100',
+  desc:'负责宠物写真/商业摄影，包括宠物抓拍、场景布置、后期修图、客户沟通。', reqSkills:['摄影','LR','PS','宠物行为','布光','构图'], prefSkills:['视频','宠物训练','营销'], reqMajor:['摄影','影视摄影与制作'], expLevel:'1-3年' },
+{ id:115, title:'产品渲染师', category:'design', catName:'设计类', company:'ANKER', city:'深圳', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=渲染师&city=101280600',
+  desc:'负责消费电子产品的高品质3D渲染，包括静帧、360°展示、爆炸图、材质表现。', reqSkills:['KeyShot','C4D','Blender','V-Ray','材质','灯光','PS'], prefSkills:['AE','犀牛','Houdini'], reqMajor:['产品设计','数字媒体艺术','视觉传达设计'], expLevel:'1-3年' },
+{ id:116, title:'综艺节目后期导演', category:'film', catName:'影视类', company:'米未传媒', city:'北京', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=后期导演&city=100010000',
+  desc:'负责综艺节目后期制作统筹，把控节目叙事节奏、笑点设计、整体包装风格。', reqSkills:['剪辑','叙事','PR','综艺感','节奏','团队管理'], prefSkills:['AE','调色','编剧'], reqMajor:['广播电视编导','戏剧影视文学','影视摄影与制作'], expLevel:'3-5年' },
+{ id:117, title:'文旅夜游设计师', category:'other', catName:'其他', company:'良业科技', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=夜游设计&city=100010000',
+  desc:'负责文旅夜游/光影秀项目设计，包括灯光设计、投影内容策划、互动体验设计。', reqSkills:['灯光设计','投影映射','TouchDesigner','CAD','文旅策划'], prefSkills:['UE5','MadMapper','3ds Max'], reqMajor:['艺术与科技','环境设计','戏剧影视美术设计'], expLevel:'1-3年' },
+{ id:118, title:'时装周/秀场策划', category:'performing', catName:'演艺类', company:'上海时装周', city:'上海', salary:'12-20K', link:'https://www.zhipin.com/web/geek/job?query=时装周&city=101020100',
+  desc:'负责时装周/品牌大秀的策划执行，包括秀场设计、模特统筹、流程管理、品牌对接。', reqSkills:['活动策划','项目管理','时尚知识','沟通能力','秀场执行'], prefSkills:['PS','英语','公关'], reqMajor:['服装与服饰设计','艺术管理','表演'], expLevel:'1-3年' },
+{ id:119, title:'影视美术指导', category:'film', catName:'影视类', company:'正午阳光', city:'北京', salary:'15-30K', link:'https://www.zhipin.com/web/geek/job?query=美术指导&city=100010000',
+  desc:'负责影视剧整体美术风格的把控，包括场景设计、道具设计、色彩方案、置景指导。', reqSkills:['美术指导','场景设计','色彩','CAD','SU','团队管理','影视美术'], prefSkills:['3ds Max','手绘','电影史'], reqMajor:['戏剧影视美术设计','环境设计','绘画'], expLevel:'5年以上' },
+{ id:120, title:'儿童剧演员', category:'performing', catName:'演艺类', company:'中国儿艺', city:'北京', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=儿童剧演员&city=100010000',
+  desc:'负责儿童剧目的排练与演出，包括角色塑造、歌舞表演、互动环节、巡演。', reqSkills:['表演','唱歌','舞蹈','儿童互动','台词','舞台经验'], prefSkills:['乐器','编剧','教学'], reqMajor:['表演','戏剧学','舞蹈表演'], expLevel:'应届生' },
+{ id:121, title:'汽车CGI设计师', category:'design', catName:'设计类', company:'蔚来汽车', city:'上海', salary:'20-35K', link:'https://www.zhipin.com/web/geek/job?query=CGI设计&city=101020100',
+  desc:'负责汽车产品CGI视觉制作，包括静帧渲染、动画、VR展示、材质表现。', reqSkills:['Maya','3ds Max','V-Ray','Arnold','PS','汽车渲染','Nuke'], prefSkills:['UE5','Houdini','Python'], reqMajor:['数字媒体艺术','产品设计','动画'], expLevel:'3-5年' },
+{ id:122, title:'展览工程/搭建管理', category:'other', catName:'其他', company:'会展公司', city:'广州', salary:'8-15K', link:'https://www.zhipin.com/web/geek/job?query=展览工程&city=101280100',
+  desc:'负责展览搭建工程的现场管理，包括施工监督、进度把控、质量验收、安全管控。', reqSkills:['CAD','工程管理','施工','材料','安全','沟通'], prefSkills:['3ds Max','预算','电工'], reqMajor:['环境设计','艺术与科技'], expLevel:'1-3年' },
+{ id:123, title:'色彩搭配师', category:'design', catName:'设计类', company:'立邦', city:'上海', salary:'10-18K', link:'https://www.zhipin.com/web/geek/job?query=色彩搭配&city=101020100',
+  desc:'负责产品/空间色彩方案设计，包括色彩趋势研究、色板制定、色彩营销策略。', reqSkills:['色彩理论','色彩搭配','趋势分析','PS','AI','色彩营销'], prefSkills:['3D','室内设计','Pantone'], reqMajor:['视觉传达设计','环境设计','服装与服饰设计'], expLevel:'1-3年' },
+{ id:124, title:'艺术科技工程师', category:'other', catName:'其他', company:'黑弓Blackbow', city:'北京', salary:'15-28K', link:'https://www.zhipin.com/web/geek/job?query=艺术科技&city=100010000',
+  desc:'负责新媒体艺术项目技术实现，包括传感器集成、交互开发、软硬件调试、现场技术支持。', reqSkills:['Arduino','Processing','TouchDesigner','Unity','传感器','编程'], prefSkills:['Python','Kinect','DMX'], reqMajor:['艺术与科技','数字媒体艺术','交互设计'], expLevel:'1-3年' },
+{ id:125, title:'时尚编辑/造型师', category:'media', catName:'新媒体', company:'VOGUE', city:'北京', salary:'12-22K', link:'https://www.zhipin.com/web/geek/job?query=时尚编辑&city=100010000',
+  desc:'负责时尚媒体内容策划与制作，包括选题策划、大片拍摄、造型搭配、文字撰写。', reqSkills:['时尚知识','造型','文案','PS','英语','摄影'], prefSkills:['视频','社交媒体','品牌关系'], reqMajor:['服装与服饰设计','新闻传播学','艺术管理'], expLevel:'1-3年' },
+        ];
+
+        // ===== TAG SYSTEM =====
+        function createTag(text, containerId) {
+            const container = document.getElementById(containerId);
+            const input = container.querySelector('input');
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.innerHTML = text + '<span class="tag-x">×</span>';
+            tag.querySelector('.tag-x').onclick = function(e) {
+                e.stopPropagation();
+                tag.remove();
+                syncProfile();
+            };
+            container.insertBefore(tag, input);
+        }
+
+        function setupTagInput(inputId, boxId, targetArray) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(boxId);
+            box.onclick = function() { input.focus(); };
+            input.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = input.value.trim();
+                    if (val && !targetArray.includes(val)) {
+                        targetArray.push(val);
+                        createTag(val, boxId);
+                        input.value = '';
+                        saveProfile();
+                    }
+                }
+                if (e.key === 'Backspace' && input.value === '' && targetArray.length > 0) {
+                    targetArray.pop();
+                    const tags = box.querySelectorAll('.tag');
+                    if (tags.length > 0) tags[tags.length-1].remove();
+                    saveProfile();
+                }
+            };
+        }
+
+        function addQuickSkill(s) {
+            if (!profile.skills.includes(s)) {
+                profile.skills.push(s);
+                createTag(s, 'skillBox');
+                document.getElementById('skillInput').value = '';
+                saveProfile();
+            }
+        }
+
+        function syncProfile() {
+            profile.skills = [];
+            profile.hardwareSkills = [];
+            document.querySelectorAll('#skillBox .tag').forEach(t => {
+                profile.skills.push(t.childNodes[0].textContent.trim());
+            });
+            document.querySelectorAll('#hwBox .tag').forEach(t => {
+                profile.hardwareSkills.push(t.childNodes[0].textContent.trim());
+            });
+        }
+
+        // ===== MATCH LOGIC (PERSONALIZED) =====
+        // Build direction→category lookup from dirData
+        const dirCategoryMap = {};
+        for (const [cat, data] of Object.entries(dirData)) {
+            for (const sub of data.subs) {
+                dirCategoryMap[sub] = cat;
+            }
+        }
+
+        function getJobCategory(job) {
+            // Check explicit category field from jobs-data.json
+            if (job.dirCategory) return job.dirCategory;
+            // Fallback: match by title
+            for (const [title, cat] of Object.entries(dirCategoryMap)) {
+                if (job.title === title || job.title.includes(title) || title.includes(job.title)) return cat;
+            }
+            return null;
+        }
+
+        function calculateDirectionScore(userDir, job) {
+            // userDir = profile.jobDirection (the exact sub-direction text user selected)
+            // Returns a score 0-100 for how well the job matches the user's direction
+            if (!userDir) return 50; // no direction selected, neutral
+            
+            const jobCat = getJobCategory(job);
+            const userCat = dirCategoryMap[userDir] || null;
+            
+            // Level 1: Exact title match → 100
+            if (job.title === userDir) return 100;
+            
+            // Level 2: Job title contains user direction substring or vice versa → 90
+            const cleanUser = userDir.replace(/设计师|师|运营|策划|编导|教师|助理|制作|专员|经理$/g,'');
+            const cleanJob = job.title.replace(/设计师|师|运营|策划|编导|教师|助理|制作|专员|经理$/g,'');
+            if (cleanUser && cleanJob && (cleanJob.includes(cleanUser) || cleanUser.includes(cleanJob))) return 90;
+            
+            // Level 3: Keyword overlap analysis
+            const userWords = cleanUser.split(/[\/·\s]+/).filter(w => w.length >= 2);
+            const jobWords = cleanJob.split(/[\/·\s]+/).filter(w => w.length >= 2);
+            const overlap = userWords.filter(w => jobWords.some(jw => jw.includes(w) || w.includes(jw)));
+            if (overlap.length >= 2) return 80;
+            if (overlap.length === 1) return 65;
+            
+            // Level 4: Same category → 50
+            if (userCat && jobCat && userCat === jobCat) return 50;
+            
+            // Level 5: Adjacent categories (design↔digital media, media↔performing, etc.)
+            const adjMap = {
+                '视觉与传达设计': ['数字媒体与动画', '时尚与工艺美术'],
+                '数字媒体与动画': ['视觉与传达设计', '影视与新媒体', '空间与产品设计'],
+                '影视与新媒体': ['数字媒体与动画', '表演与舞台艺术', '音乐与录音艺术'],
+                '空间与产品设计': ['数字媒体与动画', '时尚与工艺美术', '视觉与传达设计'],
+                '时尚与工艺美术': ['视觉与传达设计', '空间与产品设计'],
+                '音乐与录音艺术': ['影视与新媒体', '表演与舞台艺术', '艺术理论与教育'],
+                '表演与舞台艺术': ['影视与新媒体', '音乐与录音艺术', '艺术理论与教育'],
+                '艺术理论与教育': ['音乐与录音艺术', '表演与舞台艺术', '视觉与传达设计']
+            };
+            if (userCat && jobCat) {
+                const adjCats = adjMap[userCat] || [];
+                if (adjCats.includes(jobCat)) return 30;
+            }
+            
+            // Level 6: Unrelated category → 10
+            return 10;
+        }
+
+        function calculateMatch(job) {
+            let score = 0;
+            const adv = [], gaps = [], mSkills = [], xSkills = [];
+            const allPS = [...profile.skills, ...profile.hardwareSkills].map(s => s.toLowerCase());
+            const allReq = [...job.reqSkills].map(s => s.toLowerCase());
+            const allPref = [...(job.prefSkills || [])].map(s => s.toLowerCase());
+
+            // ===== 1. DIRECTION MATCH (30%) — PRIMARY PERSONALIZATION =====
+            const dirScore = calculateDirectionScore(profile.jobDirection, job);
+            score += Math.round(dirScore * 0.30);
+            if (dirScore >= 90) adv.push('🎯 求职方向高度匹配');
+            else if (dirScore >= 65) adv.push('✅ 求职方向相关');
+            else if (dirScore >= 40) adv.push('📎 同类别岗位');
+            else if (dirScore < 20 && profile.jobDirection) gaps.push('⚠ 岗位方向与您的求职目标差异较大');
+
+            // ===== 2. SKILLS MATCH (20%) =====
+            allReq.forEach(s => {
+                const found = allPS.some(ps => ps.includes(s) || s.includes(ps));
+                if (found) mSkills.push(s); else xSkills.push(s);
+            });
+            allPref.forEach(s => {
+                if (allPS.some(ps => ps.includes(s) || s.includes(ps))) mSkills.push(s);
+            });
+            const reqRate = allReq.length > 0 ? mSkills.filter(s => allReq.includes(s)).length / allReq.length : 0;
+            score += Math.round(reqRate * 20);
+            if (reqRate >= 0.8) adv.push('核心技能高度匹配');
+            else if (reqRate >= 0.5) adv.push('部分核心技能匹配');
+            if (xSkills.length > 0) gaps.push('建议补充：' + xSkills.slice(0,3).join('、'));
+
+            // ===== 3. MAJOR RELEVANCE (20%) =====
+            const majorRel = job.reqMajor.some(m => profile.major && (profile.major.includes(m) || m.includes(profile.major))) ? 100 : (profile.major ? 30 : 0);
+            score += Math.round(majorRel * 0.20);
+            if (majorRel >= 80) adv.push('专业背景匹配');
+            else if (profile.major && majorRel < 50) gaps.push('专业方向与岗位要求不完全匹配');
+
+            // ===== 4. EXPERIENCE (15%) =====
+            const expLevels = ['应届生','1年以内','1-3年','3-5年','5年以上'];
+            const pIdx = expLevels.indexOf(profile.experience);
+            const jIdx = expLevels.indexOf(job.expLevel);
+            let expMatch = 50;
+            if (pIdx >= 0 && jIdx >= 0) {
+                const diff = Math.abs(pIdx - jIdx);
+                expMatch = diff === 0 ? 100 : diff === 1 ? 70 : diff === 2 ? 40 : 20;
+            }
+            score += Math.round(expMatch * 0.15);
+            if (expMatch >= 80) adv.push('经验级别匹配');
+            else if (expMatch < 50) gaps.push('工作经验与岗位要求有差距');
+
+            // ===== 5. CITY/LOCATION MATCH (10%) =====
+            const userCity = (profile.city || '').trim();
+            const jobCity = (job.city || '').trim();
+            let cityScore = 0;
+            if (userCity && jobCity) {
+                if (jobCity === userCity || jobCity === '全国') { cityScore = 100; adv.push('📍 期望城市'); }
+                else if (jobCity === '全国') { cityScore = 70; }
+                else {
+                    // Province-level fuzzy matching via city prefix
+                    const userPref = userCity.substring(0, 2);
+                    const jobPref = jobCity.substring(0, 2);
+                    if (userPref === jobPref && userPref.length === 2) { cityScore = 60; adv.push('📍 同省城市'); }
+                    else { cityScore = 20; }
+                }
+            } else if (jobCity === '全国') {
+                cityScore = 70;
+            } else { cityScore = 40; }
+            score += Math.round(cityScore * 0.10);
+
+            // ===== 6. PORTFOLIO & PROJECTS (5%) =====
+            if (profile.portfolio) { score += 3; adv.push('有作品集链接'); }
+            else gaps.push('建议补充作品集链接');
+            if (profile.projects && profile.projects.trim().length > 30) { score += 2; adv.push('有项目经历描述'); }
+            else gaps.push('建议补充项目经历');
+
+            score = Math.min(100, Math.max(5, Math.round(score)));
+            return { ...job, score, advantages: adv, gaps, matchedSkills: mSkills, missingSkills: xSkills, majorRelevance: majorRel, experienceMatch: expMatch, directionScore: dirScore, cityScore };
+        }
+
+        function refreshMatches() {
+            syncProfile();
+            if (!profile.major && profile.skills.length === 0 && !profile.jobDirection) {
+                state.matchResults = [];
+                state.displayedResults = [];
+                state.page = 0;
+                renderMatches();
+                return;
+            }
+            const allJobs = jobLibrary.concat(state.externalJobs);
+            state.totalJobCount = allJobs.length;
+            document.getElementById('jobLibCount').textContent = state.totalJobCount >= 10000 ? '10000+' : (state.totalJobCount >= 9000 ? '9000+' : (state.totalJobCount >= 5000 ? '5000+' : state.totalJobCount));
+            state.matchResults = allJobs.map(j => calculateMatch(j)).sort((a,b) => b.score - a.score).slice(0, 20);
+            state.page = 0;
+            state.searchKeyword = '';
+            state.searchCity = profile.city || '';
+            state.searchSalary = '';
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('searchCity').value = profile.city || '';
+            document.getElementById('searchSalary').value = '';
+            applyFilters();
+            renderMatches();
+            showToast('已为 "' + (profile.name || '你') + '" 匹配 ' + state.matchResults.length + ' 个岗位', 's');
+        }
+
+        function onSearchChange() {
+            state.searchKeyword = document.getElementById('searchKeyword').value.trim();
+            state.searchCity = document.getElementById('searchCity').value;
+            state.searchSalary = document.getElementById('searchSalary').value;
+            state.page = 0;
+            applyFilters();
+            renderMatches();
+        }
+
+        function applyFilters() {
+            let results = state.matchResults;
+            // keyword search
+            if (state.searchKeyword) {
+                const kw = state.searchKeyword.toLowerCase();
+                results = results.filter(j =>
+                    j.title.toLowerCase().includes(kw) ||
+                    (j.company||'').toLowerCase().includes(kw) ||
+                    (j.desc||'').toLowerCase().includes(kw) ||
+                    (j.reqSkills||[]).some(s => s.toLowerCase().includes(kw)) ||
+                    (j.prefSkills||[]).some(s => s.toLowerCase().includes(kw)) ||
+                    (j.catName||'').includes(kw)
+                );
+            }
+            // city filter
+            if (state.searchCity) {
+                results = results.filter(j => j.city === state.searchCity);
+            }
+            // salary filter
+            if (state.searchSalary) {
+                results = results.filter(j => {
+                    const s = j.salary || '';
+                    if (state.searchSalary === '应届') return s.includes('/天') || s.includes('应届');
+                    if (state.searchSalary === '10K以下') { const m = s.match(/(\d+)/); return m && parseInt(m[1]) < 10; }
+                    if (state.searchSalary === '10-20K') { const m = s.match(/(\d+)/); return m && parseInt(m[1]) >= 10 && parseInt(m[1]) < 20; }
+                    if (state.searchSalary === '20-30K') { const m = s.match(/(\d+)/); return m && parseInt(m[1]) >= 20 && parseInt(m[1]) < 30; }
+                    if (state.searchSalary === '30K以上') { const m = s.match(/(\d+)/); return m && parseInt(m[1]) >= 30; }
+                    return true;
+                });
+            }
+            state.displayedResults = results;
+        }
+
+        function loadMore() {
+            state.page++;
+            renderMatches(true);
+        }
+
+        function goToMatch() {
+            syncProfile();
+            updateMajorField();
+            updateDirField();
+            // 严格校验：必须完成个人资料才能进入匹配
+            if (!profile.majorCat || (!profile.majorSub && !profile.majorCustom)) {
+                showToast('请先选择专业大类和专业方向', 'w');
+                return;
+            }
+            if (!profile.jobDirection) {
+                showToast('请先选择求职方向', 'w');
+                return;
+            }
+            // 清除旧的岗位选择（重新匹配后必须重新点击岗位）
+            state.selectedJobId = null;
+            // 执行匹配
+            try { refreshMatches(); } catch(e) { console.error('Match error:', e); }
+            try { saveProfile(); } catch(e) { console.error('Save error:', e); }
+            // 强制跳转到步骤2
+            state.step = 2;
+            renderAll();
+            window.scrollTo({top:0,behavior:'smooth'});
+            showToast('已匹配 ' + state.matchResults.length + ' 个岗位，点击岗位卡片获取简历优化建议', 's');
+        }
+
+        // ===== RENDER =====
+        function getScoreClass(s) { return s >= 70 ? 's-high' : s >= 40 ? 's-mid' : 's-low'; }
+
+        function renderMatches(append = false) {
+            const list = document.getElementById('matchList');
+            const empty = document.getElementById('matchEmpty');
+            const overview = document.getElementById('skillOverview');
+            const countEl = document.getElementById('matchCount');
+            const loadWrap = document.getElementById('loadMoreWrap');
+            const loadInfo = document.getElementById('loadMoreInfo');
+            const searchInfo = document.getElementById('searchResultInfo');
+
+            const filtered = state.displayedResults;
+            const total = filtered.length;
+            const start = 0;
+            const end = Math.min((state.page + 1) * state.pageSize, total);
+            const pageItems = filtered.slice(start, end);
+            const hasMore = end < total;
+
+            countEl.textContent = '共匹配 ' + total + ' 个岗位';
+            searchInfo.textContent = total > 0 ? '(显示 ' + end + '/' + total + ')' : '';
+
+            if (state.matchResults.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                overview.style.display = 'none';
+                loadWrap.style.display = 'none';
+                searchInfo.textContent = '';
+                return;
+            }
+
+            if (total === 0 && state.matchResults.length > 0) {
+                if (!append) {
+                    list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>没有找到匹配的岗位，请调整筛选条件</p></div>';
+                    overview.style.display = 'none';
+                    loadWrap.style.display = 'none';
+                    searchInfo.textContent = '(无结果)';
+                }
+                return;
+            }
+
+            empty.style.display = 'none';
+            overview.style.display = 'block';
+
+            if (!append) {
+                list.innerHTML = '';
+            }
+
+            const medals = ['🥇 ','🥈 ','🥉 '];
+            const html = pageItems.map((job, idx) => {
+                const absIdx = start + idx;
+                return `
+                <div class="match-card${absIdx===0&&!state.searchKeyword?' top':''}" onclick="goToOptimize(${job.id})">
+                    <div class="match-head">
+                        <div>
+                            <div class="match-title">${absIdx<3&&!state.searchKeyword?medals[absIdx]||'':''}${job.title}</div>
+                            <div class="match-meta">
+                                <span>🏢 ${job.company||'知名企业'}</span>
+                                <span${profile.city&&job.city===profile.city?' style="color:var(--success);font-weight:600;"':''}>📍 ${job.city||profile.city||'全国'}${profile.city&&job.city===profile.city?' ✅':''}</span>
+                                <span>💰 ${job.salary||'面议'}</span>
+                                <span>📂 ${job.catName}</span>
+                            </div>
+                        </div>
+                        <div class="match-score">
+                            <div class="score-ring ${getScoreClass(job.score)}">${job.score}%</div>
+                        </div>
+                    </div>
+                    <div class="match-tags">
+                        ${job.advantages.slice(0,4).map(a => '<span class="t-good">✓ '+a+'</span>').join('')}
+                        ${job.gaps.slice(0,3).map(g => '<span class="t-bad">⚠ '+g+'</span>').join('')}
+                    </div>
+                    <div class="match-detail">
+                        <div class="d-row"><span class="d-label">岗位描述</span><span class="d-val" style="flex:1;margin-left:12px;font-weight:400;">${job.desc}</span></div>
+                        <div class="d-row"><span class="d-label">技能匹配</span><span class="d-val">${job.matchedSkills.join('、')||'暂无'}</span></div>
+                        <div class="d-row"><span class="d-label">缺失技能</span><span class="d-val" style="color:var(--danger);">${job.missingSkills.join('、')||'无'}</span></div>
+                        <div class="d-row"><span class="d-label">专业相关度</span><span class="d-val">${job.majorRelevance}%</span></div>
+                        <div class="d-row"><span class="d-label">经验匹配度</span><span class="d-val">${job.experienceMatch}%</span></div>
+                        <div class="d-row"><span class="d-label">城市匹配度</span><span class="d-val"${job.cityScore>=80?' style="color:var(--success);font-weight:600;"':''}>${job.cityScore||0}%</span></div>
+                        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn btn-p btn-sm" onclick="event.stopPropagation();goToOptimize(${job.id})">📝 获取该岗位简历优化建议</button>
+                            ${job.link ? `<a href="${job.link}" target="_blank" class="btn btn-o btn-sm" onclick="event.stopPropagation();" style="text-decoration:none;">🏢 官网投递</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            if (append) {
+                list.insertAdjacentHTML('beforeend', html);
+            } else {
+                list.innerHTML = html;
+                window.scrollTo({ top: document.getElementById('step2Panel').offsetTop - 80, behavior: 'smooth' });
+            }
+
+            // Show/hide load more
+            if (hasMore) {
+                loadWrap.style.display = 'block';
+                loadInfo.textContent = '已显示 ' + end + '/' + total;
+            } else {
+                loadWrap.style.display = total > state.pageSize ? 'block' : 'none';
+                if (total > state.pageSize) loadInfo.textContent = '已显示全部 ' + total + ' 个岗位';
+            }
+
+            // Skill overview (only on first render)
+            if (!append) {
+                const top5 = state.matchResults.slice(0, 5);
+                if (top5.length > 0) {
+                    const avgSkill = Math.round(top5.reduce((s,j)=>s+(j.matchedSkills.length/Math.max(1,j.reqSkills.length+(j.prefSkills||[]).length))*100,0)/top5.length);
+                    const avgMajor = Math.round(top5.reduce((s,j)=>s+j.majorRelevance,0)/top5.length);
+                    const avgExp = Math.round(top5.reduce((s,j)=>s+j.experienceMatch,0)/top5.length);
+                    const avgOverall = Math.round(top5.reduce((s,j)=>s+j.score,0)/top5.length);
+                    const dims = [
+                        { name:'技能匹配', score: Math.min(100,avgSkill) },
+                        { name:'专业相关', score: avgMajor },
+                        { name:'经验匹配', score: avgExp },
+                        { name:'综合得分', score: avgOverall }
+                    ];
+                    document.getElementById('skillBars').innerHTML = dims.map(d => `
+                        <div class="sbar">
+                            <span class="sbar-name">${d.name}</span>
+                            <div class="sbar-track"><div class="sbar-fill ${d.score>=70?'fill-h':d.score>=40?'fill-m':'fill-l'}" style="width:${d.score}%"></div></div>
+                            <span class="sbar-pct">${d.score}%</span>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function toggleDetail(el, id) {
+            const detail = el.querySelector('.match-detail');
+            const isOpening = !detail.classList.contains('show');
+            detail.classList.toggle('show');
+            // Cloud track match view
+            if (isOpening) {
+                const match = state.matchResults.find(j => j.id === id);
+                if (match) {
+                    CloudAPI.saveMatch(id, match.title, match.company||'知名企业', Math.round(match.score||0)).catch(()=>{});
+                }
+            }
+        }
+
+        // ===== RESUME OPTIMIZATION =====
+        function extractKeywords(jd) {
+            const bank = [
+                'PS','AI','AE','PR','Figma','Sketch','C4D','Blender','Maya','3ds Max','ZBrush','Houdini','Nuke',
+                'Substance Painter','Unity','UE5','Unreal','TouchDesigner','Processing','Arduino','CAD','SU',
+                'SketchUp','犀牛','达芬奇','Final Cut','Logic Pro','Cubase','Pro Tools',
+                '品牌设计','VI设计','UI设计','UX设计','交互设计','用户体验','用户研究','设计系统','设计规范',
+                '视觉设计','平面设计','版式设计','字体设计','色彩理论','排版','印刷','包装设计',
+                '插画','手绘','板绘','原画','角色设计','场景设计','概念设计','故事板',
+                '三维建模','渲染','动画','动效','Motion','特效','合成','剪辑','调色','音频',
+                '摄影','摄像','布光','构图','后期','修图',
+                'HTML','CSS','JavaScript','前端','Web','响应式','移动端',
+                '内容策划','文案','运营','数据分析','用户增长','社群运营','短视频','直播',
+                '教学','课程设计','课件','课堂管理','学生指导',
+                '策展','展览','艺术史','当代艺术','公共教育',
+                '沟通','团队协作','项目管理','创意','审美','细节','抗压','执行力',
+                '作品集','Portfolio','Behance','站酷','Dribbble',
+            ];
+            const jdLower = jd.toLowerCase();
+            return bank.filter(kw => jdLower.includes(kw.toLowerCase()));
+        }
+
+        // ===== RESUME UPLOAD =====
+        async function handleResumeUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const ext = file.name.split('.').pop().toLowerCase();
+            
+            if (ext === 'txt') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.resumeText = e.target.result;
+                    showResumePreview(state.resumeText, file.name);
+                };
+                reader.readAsText(file, 'UTF-8');
+            } else if (ext === 'pdf') {
+                await parsePDF(file);
+            } else if (ext === 'docx') {
+                await parseDOCX(file);
+            } else {
+                showToast('⚠ 不支持的文件格式，请上传 .txt / .pdf / .docx', 'w');
+            }
+        }
+
+        async function parsePDF(file) {
+            try {
+                if (typeof pdfjsLib === 'undefined') {
+                    showToast('⚠ PDF解析库加载中，请稍后重试或使用.txt格式', 'w');
+                    return;
+                }
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                var buf = await file.arrayBuffer();
+                var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+                var maxPages = Math.min(pdf.numPages, 20);
+                var pageTexts = [];
+                for (var p = 1; p <= maxPages; p++) {
+                    var page = await pdf.getPage(p);
+                    var content = await page.getTextContent();
+                    var items = content.items;
+                    if (items.length === 0) { pageTexts.push(''); continue; }
+
+                    // 收集文本项，使用 PDF 自身的 item.height 作为高度
+                    var textItems = [];
+                    for (var k = 0; k < items.length; k++) {
+                        var item = items[k];
+                        var tx = item.transform;
+                        var str = item.str || '';
+                        // 过滤空字符串和非可打印字符
+                        str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+                        if (!str.trim()) continue;
+                        var x = tx[4];
+                        var y = tx[5];
+                        var w = item.width || 0;
+                        var h = (item.height > 0) ? item.height : 12;
+                        textItems.push({ str: str, x: x, y: y, w: w, h: h });
+                    }
+                    if (textItems.length === 0) { pageTexts.push(''); continue; }
+
+                    // 按 Y 降序（从上到下），同 Y 按 X 升序（从左到右）
+                    textItems.sort(function(a, b) {
+                        var dy = b.y - a.y;
+                        if (Math.abs(dy) < 1.5) return a.x - b.x;
+                        return dy;
+                    });
+
+                    // 计算平均行高
+                    var totalH = 0;
+                    for (var k = 0; k < Math.min(textItems.length, 50); k++) { totalH += textItems[k].h; }
+                    var avgH = totalH / Math.min(textItems.length, 50);
+
+                    // 分组：Y 坐标相近的归为同一行
+                    var lines = [];
+                    var curLine = [textItems[0]];
+                    var curY = textItems[0].y;
+                    for (var k = 1; k < textItems.length; k++) {
+                        var ti = textItems[k];
+                        if (Math.abs(ti.y - curY) < avgH * 0.55) {
+                            curLine.push(ti);
+                        } else {
+                            lines.push(curLine);
+                            curLine = [ti];
+                            curY = ti.y;
+                        }
+                    }
+                    lines.push(curLine);
+
+                    // 逐行渲染
+                    var pageText = '';
+                    var prevY = null;
+                    for (var li = 0; li < lines.length; li++) {
+                        var line = lines[li];
+                        line.sort(function(a, b) { return a.x - b.x; });
+
+                        // 段落间距检测
+                        if (prevY !== null) {
+                            var gap = prevY - line[0].y;
+                            if (gap > avgH * 1.8) {
+                                pageText += '\n';  // 段落间空行
+                            }
+                        }
+
+                        // 拼接同行文本
+                        var lineText = '';
+                        for (var wi = 0; wi < line.length; wi++) {
+                            var cur = line[wi];
+                            if (wi > 0) {
+                                var prev = line[wi - 1];
+                                var spaceW = avgH * 0.25;
+                                var xGap = cur.x - (prev.x + Math.max(prev.w, 1));
+                                if (xGap > spaceW) {
+                                    lineText += ' ';
+                                }
+                            }
+                            lineText += cur.str;
+                        }
+                        pageText += lineText.trimEnd() + '\n';
+                        prevY = line[0].y;
+                    }
+                    pageTexts.push(pageText);
+                }
+                var raw = pageTexts.join('\n').trim();
+                // 最终清理：压缩过多的连续空行，但保留基本结构
+                raw = raw.replace(/\n{4,}/g, '\n\n\n');
+                if (raw.replace(/\s/g, '').length > 20) {
+                    state.resumeText = raw;
+                    showResumePreview(raw, file.name);
+                } else {
+                    showToast('⚠ PDF文本提取较少，建议导出为.txt后上传', 'w');
+                }
+            } catch(e) {
+                console.error('PDF parse error:', e);
+                showToast('⚠ PDF解析失败，请尝试保存为.txt格式后上传', 'w');
+            }
+        }
+
+        async function parseDOCX(file) {
+            try {
+                const buf = await file.arrayBuffer();
+                const bytes = new Uint8Array(buf);
+                // DOCX is a ZIP file. Find central directory and extract word/document.xml
+                const eocdOffset = findEOCD(bytes);
+                if (eocdOffset < 0) throw new Error('Not a valid ZIP');
+                
+                const view = new DataView(buf);
+                const cdOffset = view.getUint32(eocdOffset + 16, true);
+                const cdSize = view.getUint32(eocdOffset + 12, true);
+                const totalEntries = view.getUint16(eocdOffset + 10, true);
+                
+                // Find word/document.xml in central directory
+                let docXmlOffset = -1, docXmlCompSize = 0, docXmlSize = 0, docXmlCompMethod = 0;
+                let pos = cdOffset, endCd = cdOffset + cdSize;
+                while (pos < endCd) {
+                    const nameLen = view.getUint16(pos + 28, true);
+                    const extraLen = view.getUint16(pos + 30, true);
+                    const commentLen = view.getUint16(pos + 32, true);
+                    const nameBytes = bytes.slice(pos + 46, pos + 46 + nameLen);
+                    const name = new TextDecoder('utf-8').decode(nameBytes);
+                    if (name === 'word/document.xml') {
+                        docXmlCompMethod = view.getUint16(pos + 10, true);
+                        docXmlCompSize = view.getUint32(pos + 20, true);
+                        docXmlSize = view.getUint32(pos + 24, true);
+                        docXmlOffset = view.getUint32(pos + 42, true);
+                        break;
+                    }
+                    pos += 46 + nameLen + extraLen + commentLen;
+                }
+                
+                if (docXmlOffset < 0) throw new Error('document.xml not found');
+                
+                // Read local file header to skip to compressed data
+                const lfhNameLen = view.getUint16(docXmlOffset + 26, true);
+                const lfhExtraLen = view.getUint16(docXmlOffset + 28, true);
+                const dataOffset = docXmlOffset + 30 + lfhNameLen + lfhExtraLen;
+                const compData = bytes.slice(dataOffset, dataOffset + docXmlCompSize);
+                
+                let xmlText;
+                if (docXmlCompMethod === 0) {
+                    // Stored (no compression)
+                    xmlText = new TextDecoder('utf-8').decode(compData);
+                } else if (docXmlCompMethod === 8) {
+                    // Deflate
+                    const ds = new DecompressionStream('deflate-raw');
+                    const writer = ds.writable.getWriter();
+                    writer.write(compData);
+                    writer.close();
+                    const decompressed = await new Response(ds.readable).arrayBuffer();
+                    xmlText = new TextDecoder('utf-8').decode(decompressed);
+                } else {
+                    throw new Error('Unsupported compression: ' + docXmlCompMethod);
+                }
+                
+                // Extract text from <w:t> tags
+                const wMatches = xmlText.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
+                if (!wMatches) throw new Error('No text found');
+                const raw = wMatches.map(m => m.replace(/<[^>]+>/g, '')).join('');
+                
+                if (raw.trim().length > 20) {
+                    state.resumeText = raw;
+                    showResumePreview(raw, file.name);
+                } else {
+                    showToast('⚠ DOCX文本提取较少，建议导出为.txt后上传', 'w');
+                }
+            } catch(e) {
+                console.error('DOCX parse error:', e);
+                showToast('⚠ DOCX解析失败，建议导出为.txt格式后重新上传', 'w');
+            }
+        }
+
+        function findEOCD(bytes) {
+            // Search for End of Central Directory signature (0x06054b50) in last 64KB
+            const searchStart = Math.max(0, bytes.length - 65557);
+            for (let i = bytes.length - 22; i >= searchStart; i--) {
+                if (bytes[i] === 0x50 && bytes[i+1] === 0x4b && bytes[i+2] === 0x05 && bytes[i+3] === 0x06) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function showResumePreview(text, filename) {
+            var preview = document.getElementById('resumePreview');
+            var charCount = text.replace(/\s/g, '').length;
+            var displayText = text.substring(0, 3000);
+
+            // 检测简历板块
+            var sections = [];
+            if (/教育|学历|毕业|学校|大学|学院/.test(text)) sections.push('🎓教育');
+            if (/工作|实习|经历|公司|任职/.test(text)) sections.push('💼经历');
+            if (/项目|作品|案例/.test(text)) sections.push('📁项目');
+            if (/技能|熟练|掌握|精通|软件/.test(text)) sections.push('🛠技能');
+            if (/自我|评价|优势|特点/.test(text)) sections.push('✨评价');
+
+            // HTML 转义
+            var cleanText = displayText
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .trim();
+
+            preview.innerHTML =
+                '<div class="resume-preview-header">' +
+                    '<span style="font-weight:700;font-size:14px;">📋 已解析简历</span>' +
+                    '<div class="resume-preview-meta">' +
+                        '<span class="resume-preview-badge file">📄 ' + filename + '</span>' +
+                        '<span class="resume-preview-badge chars">📝 ' + charCount + '字</span>' +
+                        (sections.length > 0 ? '<span class="resume-preview-badge" style="background:rgba(108,92,231,0.08);color:var(--primary);">' + sections.join(' ') + '</span>' : '') +
+                        (charCount < 200 ? '<span class="resume-preview-badge warn">⚠ 内容偏短</span>' : '') +
+                    '</div>' +
+                    '<button class="btn btn-o btn-sm" onclick="clearResume()" style="font-size:11px;padding:3px 12px;">✕ 清除</button>' +
+                '</div>' +
+                '<div class="resume-text">' + cleanText + '</div>';
+
+            if (text.length > 3000) {
+                preview.innerHTML += '<div style="padding:8px 16px;font-size:11px;color:var(--text3);text-align:center;background:#FFF9E6;border-top:1px solid #F0EDFF;">⚠ 内容已截断，仅展示前3000字。完整内容已用于分析。</div>';
+            }
+
+            preview.style.display = 'block';
+            document.getElementById('uploadZone').style.display = 'none';
+            showToast('✅ 简历已解析成功', 's');
+        }
+
+        function clearResume() {
+            state.resumeText = '';
+            document.getElementById('resumePreview').style.display = 'none';
+            document.getElementById('uploadZone').style.display = 'block';
+            document.getElementById('resumeFile').value = '';
+            // 清除步骤3的分析结果（如有）
+            var optEl = document.getElementById('optResult');
+            if (optEl) { optEl.innerHTML = ''; optEl.style.display = 'none'; }
+            showToast('简历已清除，请重新上传', 'i');
+        }
+
+        // Drag & drop support
+        (function initUploadDrag() {
+            const zone = document.getElementById('uploadZone');
+            if (!zone) return;
+            zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor='var(--primary)';zone.style.background='#F0EDFF'; });
+            zone.addEventListener('dragleave', function(e) { e.preventDefault(); zone.style.borderColor='#D5D0F0';zone.style.background='#FAFAFF'; });
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                zone.style.borderColor='#D5D0F0';
+                zone.style.background='#FAFAFF';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('resumeFile').files = files;
+                    handleResumeUpload({ target: { files: files } });
+                }
+            });
+        })();
+
+        function analyzeResume() {
+            syncProfile();
+            const jd = state.selectedJobJd || '';
+            if (!jd.trim()) return;
+
+            // 合并上传的简历内容到个人资料中进行更精准分析
+            const resumeExtra = state.resumeText || '';
+
+            const hasResume = resumeExtra.length >= 20;
+
+            // 显示分析中状态
+            var analyzingEl = document.getElementById('step3Analyzing');
+            if (analyzingEl) analyzingEl.style.display = 'block';
+            var optEl2 = document.getElementById('optResult');
+            if (optEl2) { optEl2.innerHTML = ''; optEl2.style.display = 'none'; }
+
+            // 动态更新步骤3标题
+            const titleEl = document.getElementById('step3Title');
+            const hintEl = document.getElementById('step3Hint');
+            if (titleEl) {
+                titleEl.textContent = hasResume ? '简历深度分析' : '简历书写建议';
+            }
+            if (hintEl) {
+                hintEl.textContent = hasResume ? '（已上传简历，深度对比分析中）' : '（根据背景信息与JD生成书写框架）';
+            }
+
+            const btn = document.getElementById('btnAnalyze');
+            btn.textContent = '🔍 分析中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const jdKeywords = extractKeywords(jd);
+                const allPS = [...profile.skills, ...profile.hardwareSkills].map(s => s.toLowerCase());
+
+                // 如果上传了简历，从简历中提取额外技能关键词
+                const resumeKeywords = hasResume ? extractKeywords(resumeExtra) : [];
+                const resumeLower = hasResume ? resumeExtra.toLowerCase() : '';
+                const allWithResume = [...new Set([...allPS, ...resumeKeywords.map(k=>k.toLowerCase())])];
+
+                const matched = jdKeywords.filter(kw => allWithResume.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps)));
+                const missed = jdKeywords.filter(kw => !allWithResume.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps)));
+                const resumeOnlyMatched = hasResume ? jdKeywords.filter(kw => 
+                    resumeLower.includes(kw.toLowerCase()) && !allPS.some(ps => ps.includes(kw.toLowerCase()) || kw.toLowerCase().includes(ps))
+                ) : [];
+
+                const overall = Math.min(98, Math.max(10, allPS.length > 0 || hasResume
+                    ? Math.round((matched.length/Math.max(1,jdKeywords.length))*60 + (profile.major?20:0) + (profile.projects||hasResume?10:0) + (profile.portfolio?10:0))
+                    : 30));
+
+                const tips = [];
+                const pfTips = [];
+                const pjTips = [];
+                const skillPath = [];
+                const editTips = [];
+
+                // ================================================================
+                //  双模式分支
+                // ================================================================
+                if (hasResume && resumeExtra.length > 50) {
+                    // ===== 模式A：简历深度分析（有完整简历） =====
+                    const hasEdu = /教育|学历|毕业|学校|大学|学院|本科|硕士|博士|专业/.test(resumeExtra);
+                    const hasExp = /工作|实习|经历|公司|任职|担任/.test(resumeExtra);
+                    const hasProject = /项目|作品|案例|上线|负责.*设计|参与.*项目/.test(resumeExtra);
+                    const hasSkill = /技能|熟练|掌握|精通|了解|工具|软件/.test(resumeExtra);
+                    const hasSelf = /自我|个人|特点|优势|性格|评价/.test(resumeExtra);
+                    
+                    const missingSections = ['教育背景','工作/实习经历','项目经历','技能','自我评价'].filter(s => 
+                        (s==='教育背景'&&!hasEdu)||(s==='工作/实习经历'&&!hasExp)||(s==='项目经历'&&!hasProject)||(s==='技能'&&!hasSkill)||(s==='自我评价'&&!hasSelf)
+                    );
+                    if (missingSections.length > 0) {
+                        editTips.push({ type: 'warn', title: '缺少核心板块', text: '简历缺少：' + missingSections.join('、') + '。HR平均阅读时间仅6秒，完整结构是基本要求。' });
+                    }
+                    if (missed.length > 0) {
+                        const rewriteSuggestions = [];
+                        missed.slice(0, 5).forEach(kw => {
+                            if (hasExp && kw.length >= 2) rewriteSuggestions.push('在工作经历中补充："熟练运用' + kw + '完成XX设计任务，提升效率30%"');
+                            else if (hasProject && kw.length >= 2) rewriteSuggestions.push('在项目经历中补充："运用' + kw + '独立完成XX模块的设计与落地"');
+                            else if (hasSkill && kw.length >= 2) rewriteSuggestions.push('在技能栏增加"' + kw + '"及相关熟练度描述');
+                        });
+                        if (rewriteSuggestions.length > 0) editTips.push({ type: 'fix', title: '缺少' + missed.slice(0,5).length + '个JD关键技能词，建议如下嵌入', text: rewriteSuggestions.join('\n') });
+                    }
+                    if (hasExp || hasProject) {
+                        const expLines = resumeExtra.split(/[\n\r]+/).filter(l => /公司|实习|工作|担任|负责|参与|完成|设计|开发|制作|策划|运营/.test(l) && l.length > 10);
+                        if (expLines.length > 0) {
+                            const beforeAfter = [];
+                            expLines.slice(0, 3).forEach(line => {
+                                const trimmed = line.trim().substring(0, 80);
+                                const hasNumber = /\d+%|\d+人|\d+万|\d+个|\d+天|\d+倍/.test(trimmed);
+                                const hasAction = /负责|主导|带领|完成|推动|优化|提升|降低|实现|达成/.test(trimmed);
+                                if (!hasNumber && !hasAction) beforeAfter.push('原文：' + trimmed + '\n→ 改为：主导完成XX相关设计任务，通过优化流程将交付效率提升25%');
+                                else if (!hasNumber) beforeAfter.push('原文：' + trimmed + '\n→ 建议增加量化成果，例如："...最终设计方案通过率提升至90%，节省开发工时15人天"');
+                                else if (!hasAction) beforeAfter.push('原文：' + trimmed + '\n→ 建议以强动词开头，例如："主导/负责/推动"替代原文描述性开头');
+                            });
+                            if (beforeAfter.length > 0) editTips.push({ type: 'fix', title: '经历描述不够有说服力，建议如下改写', text: beforeAfter.join('\n\n') });
+                        }
+                    }
+                    if (resumeOnlyMatched.length > 0) {
+                        editTips.push({ type: 'good', title: '简历与JD匹配亮点', text: '您的简历已覆盖以下JD关键词：' + resumeOnlyMatched.slice(0,6).join('、') + '。这些词在HR筛选中是加分项，请保持在显眼位置。' });
+                    }
+                    const trulyMissing = missed.filter(kw => !resumeLower.includes(kw.toLowerCase()));
+                    if (trulyMissing.length > 0 && resumeExtra.length > 100) {
+                        const suggestion = [];
+                        suggestion.push('当前简历完全未提及JD关键词：' + trulyMissing.slice(0, 4).join('、'));
+                        suggestion.push('嵌入位置建议：');
+                        if (hasSkill) suggestion.push('→ 技能板块：新增一行"' + trulyMissing.slice(0,3).join(' / ') + '"');
+                        if (hasExp) suggestion.push('→ 工作经历：将"' + trulyMissing[0] + '"自然融入最近一段经历的职责描述中');
+                        if (hasSelf) suggestion.push('→ 自我评价：首句改为"具备' + trulyMissing[0] + '等专业技能的设计师"');
+                        editTips.push({ type: 'fix', title: '关键JD词未覆盖的明确修改方案', text: suggestion.join('\n') });
+                    }
+                    const wordCount = resumeExtra.replace(/\s/g,'').length;
+                    if (wordCount < 300) {
+                        editTips.push({ type: 'warn', title: '简历内容不足', text: '当前简历约' + wordCount + '字符，远低于标准500-800字。请补充：\n1. 每个工作/项目经历至少3-5行具体描述\n2. 增加"个人技能"板块列出所有工具和技能\n3. 增加"获奖/证书"板块（如有）' });
+                    }
+                    const formatIssues = [];
+                    if (!/[\d]{4}[.\-/年][\d]{1,2}[.\-/月]/.test(resumeExtra)) formatIssues.push('缺少明确日期格式（如2023.06），HR无法判断经验年限');
+                    if (/[a-zA-Z]{20,}/.test(resumeExtra)) formatIssues.push('检测到大段英文，如果是中文简历建议以中文为主，英文术语加注');
+                    if (!/电话|手机|邮箱|@/.test(resumeExtra)) formatIssues.push('未检测到联系方式（电话/邮箱），这是简历最基本要素');
+                    if (formatIssues.length > 0) editTips.push({ type: 'warn', title: '格式与基本信息问题', text: formatIssues.join('\n') });
+
+                    // 通用tips（有简历时精简）
+                    tips.push('使用STAR法则（情境-任务-行动-结果）描述项目经历，量化成果（如"设计稿通过率提升30%"）。');
+                } else if (hasResume && resumeExtra.length > 0) {
+                    editTips.push({ type: 'warn', title: '简历内容过短无法深度分析', text: '请上传完整的简历文件（建议500字以上），以获取逐段修改建议。' });
+                    if (missed.length > 0) tips.push('简历中缺少JD关键技能词：' + missed.slice(0,5).join('、') + '。建议在技能栏和项目经历中自然嵌入这些关键词。');
+                    if (matched.length > 0) tips.push('已匹配关键词：' + matched.slice(0,5).join('、') + '，建议在简历中将这些词放在显眼位置（技能栏前3项）。');
+                    tips.push('使用STAR法则（情境-任务-行动-结果）描述项目经历，量化成果（如"设计稿通过率提升30%"）。');
+                } else {
+                    // ===== 模式B：简历书写建议（无简历时） =====
+                    tips.push('📌 <b>简历框架建议</b> — 一份标准简历应包含以下板块：个人信息 → 教育背景 → 技能 → 工作/实习经历 → 项目经历 → 自我评价。');
+                    const dirLabel = profile.jobDirection || '设计';
+                    tips.push('📝 <b>个人信息区：</b>姓名 + 求职意向（' + dirLabel + '）+ 联系方式 + 作品集链接。求职意向建议直接对标目标岗位名称。');
+                    tips.push('🎓 <b>教育背景：</b>按时间倒序列出学历信息，包括学校名称、专业、起止时间。GPA高于3.5或专业排名靠前可标注。');
+                    tips.push('🛠 <b>技能板块：</b>按熟练度分档列出软件工具。JD要求的核心技能放在第一档（如精通Figma/PS/AI），次要技能放第二档（如了解HTML/CSS）。');
+                    
+                    if (missed.length > 0) {
+                        tips.push('🎯 <b>JD关键词植入清单：</b>你需要在简历中覆盖以下JD关键词——' + missed.slice(0,6).join('、') + '。将这些词自然嵌入技能栏和项目描述中。');
+                    }
+                    if (matched.length > 0) {
+                        tips.push('✅ <b>已匹配技能词：</b>' + matched.slice(0,6).join('、') + ' — 这些是你的优势，放在技能栏前3-5项显眼位置。');
+                    }
+                    
+                    tips.push('📋 <b>工作/实习经历写法：</b>每条经历包含4要素——公司/职位/时间/3-5条bullet描述。用"动词+任务+方法+结果"结构，每句必有数据。');
+                    tips.push('💡 <b>STAR法则示例模板（直接套用）：</b>');
+                    tips.push('<span style="font-size:12px;color:var(--text2);">【S情境】在XX公司担任' + dirLabel + '期间，负责XX产品线 / 【T任务】接到XX需求，目标是提升XX指标 / 【A行动】主导设计XX模块，运用XX工具输出XX套方案，组织X轮评审迭代 / 【R结果】方案上线后XX指标提升XX%，获XX奖项/好评</span>');
+                    
+                    const hasProjects = profile.projects && profile.projects.trim().length > 10;
+                    if (hasProjects) {
+                        tips.push('🔗 <b>项目经历：</b>你已填写的项目经历可直接迁移到简历，每个项目添加"我的贡献"和"量化成果"两段。');
+                    } else {
+                        tips.push('⚠️ <b>项目经历：</b>你尚未填写项目经历。强烈建议补充至少2个（含课程作业），包装结构：项目背景→你的角色→使用工具→解决的问题→达成的效果。');
+                    }
+                    tips.push('✨ <b>排版原则：</b>一页A4为佳，使用清晰的分区标题，字体统一（建议中文宋体/黑体、英文Helvetica），段落间距均匀。');
+                    tips.push('📎 <b>加分项：</b>在简历末尾附加作品集链接（站酷/Behance/GitHub），如获过奖/证书也一并列出。');
+                }
+
+                // ===== 简历专项分析（仅在有简历时展示） =====
+                const resumeTips = [];
+                if (hasResume) {
+                    const wordCount2 = resumeExtra.replace(/\s/g,'').length;
+                    if (wordCount2 < 200) resumeTips.push('⚠ 简历内容偏短（约' + wordCount2 + '字符），建议扩展至600-800字，充分展现项目经历和成果。');
+                    else if (wordCount2 > 2000) resumeTips.push('💡 简历偏长（约' + wordCount2 + '字符），建议精简至1页，突出最相关的经历。');
+                    const density = (matched.length / Math.max(1, jdKeywords.length) * 100).toFixed(0);
+                    if (density < 30) resumeTips.push('🔴 简历与JD关键词匹配率仅' + density + '%，请参考上方"逐段修改建议"有针对性地改写。');
+                    else if (density >= 60) resumeTips.push('🟢 简历关键词与JD匹配率达' + density + '%，内容方向正确，重点优化表述和数据化。');
+                    const hasDate = /20\d{2}[.\-/年]/.test(resumeExtra);
+                    if (!hasDate) resumeTips.push('📌 简历缺少时间标注，请为每段经历添加起止日期（如2023.06-2024.09）。');
+                }
+
+                // ===== 项目包装 & 作品集建议（通用） =====
+                if (profile.projects && profile.projects.trim().length > 10) {
+                    pjTips.push('将项目经历与JD中的岗位职责对应改写，例如JD要求"设计系统搭建"，就突出你参与过的组件库/规范制定经历。');
+                    pjTips.push('每个项目增加"我的贡献"和"项目成果"两个小节，用数据说话。');
+                    pjTips.push('提炼1-2个与目标岗位最相关的项目放在简历最前面，弱化不相关经历。');
+                } else {
+                    pjTips.push('强烈建议补充至少2个项目经历，即使是课程作业或自发性项目也可以包装呈现。');
+                    pjTips.push('项目描述结构：项目背景 → 你的角色 → 使用的工具/方法 → 解决的问题 → 达成的效果。');
+                }
+                pjTips.push('如果缺乏商业项目，可以将课程作业按商业标准重新包装，强调设计思路和解决问题的能力。');
+
+                if (profile.portfolio) {
+                    pfTips.push('作品集排列顺序：将与目标岗位最相关的3个项目放在最前面。');
+                    pfTips.push('每个作品添加简短说明：项目背景、设计思路、你的角色、使用的工具。');
+                    pfTips.push('确保作品集链接可直接访问，建议使用站酷/Behance等专业平台。');
+                } else {
+                    pfTips.push('⚠️ 紧急：请尽快搭建作品集！推荐平台：站酷（国内）、Behance（国际）、个人网站。');
+                    pfTips.push('作品集数量建议：精选6-10个高质量作品，宁缺毋滥。');
+                }
+                pfTips.push('针对目标岗位调整作品集侧重点：投UI岗位则突出界面设计作品，投品牌设计则突出VI/logo作品。');
+                pfTips.push('在作品集中展示设计过程（process），包括草图、迭代、最终方案，体现专业设计思维。');
+
+                if (missed.length > 0) skillPath.push('短期（1-2周）：快速上手 ' + missed.slice(0,2).join('、') + ' 基础操作，通过B站/教程网学习核心功能。');
+                skillPath.push('中期（1-3月）：完成2-3个与目标岗位相关的实战项目，积累作品集素材。');
+                skillPath.push('长期：持续关注行业趋势，参加设计比赛或开源项目，建立个人品牌影响力。');
+                if (!profile.portfolio) skillPath.push('本周目标：注册站酷或Behance账号，上传至少3个作品。');
+
+                let summary = overall >= 80 ? '🎉 背景与JD匹配度较高，重点优化作品集呈现和项目包装即可大幅提升通过率。'
+                    : overall >= 50 ? '📈 有一定匹配基础，需要针对性地补充技能和优化简历内容。'
+                    : '🔧 匹配度偏低，建议优先提升核心技能，同时通过项目包装和作品集优化来弥补差距。';
+
+                const html = `
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-p"></span>综合匹配度</div>
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <div class="score-ring ${getScoreClass(overall)}" style="width:64px;height:64px;font-size:20px;">${overall}%</div>
+                            <div style="flex:1;">
+                                <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${summary}</div>
+                                <div style="font-size:12px;color:var(--text2);">${matched.length} / ${jdKeywords.length} 关键词匹配</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-p"></span>关键词匹配分析</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            ${matched.map(kw => '<span class="kw kw-y">✓ '+kw+'</span>').join('')}
+                            ${missed.map(kw => '<span class="kw kw-n">✗ '+kw+'</span>').join('')}
+                        </div>
+                    </div>
+                    ${editTips.length > 0 ? `
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-r"></span>逐段修改建议</div>
+                        ${editTips.map(et => {
+                            const colors = {good:'#00B894', warn:'#FDCB6E', fix:'#6C5CE7'};
+                            const ico = {good:'✅', warn:'⚠️', fix:'🔧'};
+                            return '<div style="margin-bottom:12px;padding:12px 14px;background:white;border-radius:8px;border-left:3px solid '+(colors[et.type]||'#6C5CE7')+';">'
+                                + '<div style="font-weight:600;font-size:13px;margin-bottom:4px;">'+(ico[et.type]||'')+' '+et.title+'</div>'
+                                + '<div style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.8;">'+et.text+'</div></div>';
+                        }).join('')}
+                    </div>
+                    ` : ''}
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-p"></span>简历优化方案</div>
+                        <ul class="opt-list">${tips.map((t,i)=>'<li>'+(i+1)+'. '+t+'</li>').join('')}</ul>
+                    </div>
+                    ${resumeTips.length > 0 ? `
+                    <div class="opt-sec" style="background:#FFF9E6;border-left:3px solid #FDCB6E;padding:12px 16px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">
+                        <div class="opt-sec-title"><span class="dot" style="background:#FDCB6E;"></span>📄 简历上传专项分析</div>
+                        <ul class="opt-list">${resumeTips.map(t=>'<li>'+t+'</li>').join('')}</ul>
+                    </div>
+                    ` : ''}
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-g"></span>作品集呈现建议</div>
+                        <ul class="opt-list">${pfTips.map(t=>'<li class="pf">'+t+'</li>').join('')}</ul>
+                    </div>
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-r"></span>项目包装建议</div>
+                        <ul class="opt-list">${pjTips.map(t=>'<li class="gap">'+t+'</li>').join('')}</ul>
+                    </div>
+                    <div class="opt-sec">
+                        <div class="opt-sec-title"><span class="dot dot-p"></span>技能提升路径</div>
+                        <ul class="opt-list">${skillPath.map(t=>'<li>'+t+'</li>').join('')}</ul>
+                    </div>
+                `;
+
+                document.getElementById('optResult').innerHTML = html;
+                document.getElementById('optResult').style.display = 'block';
+                // 隐藏分析中状态，显示重新分析按钮
+                var aEl = document.getElementById('step3Analyzing');
+                if (aEl) aEl.style.display = 'none';
+                var hintEl2 = document.getElementById('step3Hint');
+                if (hintEl2) hintEl2.textContent = '';
+                btn.textContent = '🔍 重新分析';
+                btn.style.display = 'inline-flex';
+                btn.disabled = false;
+                showToast('分析完成！请查看下方优化建议', 's');
+                var jdTitle = state.selectedJobTitle || '';
+                var jdCompany = state.selectedJobCompany || '';
+                CloudAPI.saveOptimize(jdTitle, jdCompany, profile, html).catch(function(){});
+            }, 1200);
+        }
+
+        function goToOptimize(jobId) {
+            syncProfile();
+            var job = state.matchResults.find(function(j) { return j.id === jobId; }) || jobLibrary.find(function(j) { return j.id === jobId; });
+            if (!job) return;
+            state.selectedJobId = jobId;
+
+            // 构建完整JD文本并存入state
+            var jdText = '【岗位名称】' + job.title + '\n【公司】' + (job.company||'知名企业') + '\n【薪资】' + (job.salary||'面议') + '\n【工作地点】' + (job.city||'全国') + '\n\n【岗位职责】\n' + job.desc + '\n\n【任职要求】\n- 熟练使用 ' + job.reqSkills.join('、') + '\n' + (job.prefSkills&&job.prefSkills.length>0?'- 加分项：'+job.prefSkills.join('、')+'\n':'') + '- 专业要求：' + job.reqMajor.join('、') + '\n- 工作经验：' + job.expLevel;
+            state.selectedJobJd = jdText;
+            state.selectedJobTitle = job.title;
+            state.selectedJobCompany = job.company || '知名企业';
+
+            // Cloud track
+            CloudAPI.saveMatch(jobId, job.title, state.selectedJobCompany, Math.round(job.score||0)).catch(function(){});
+
+            // 导航到步骤3
+            goToStep(3);
+
+            // 填充岗位信息展示区
+            document.getElementById('step3JobTitle').textContent = job.title;
+            document.getElementById('step3JobMeta').innerHTML = 
+                '<span>' + (job.company||'知名企业') + '</span> &nbsp;·&nbsp; <span>' + (job.salary||'面议') + '</span> &nbsp;·&nbsp; <span>' + (job.city||'全国') + '</span> &nbsp;·&nbsp; <span>' + job.expLevel + '</span>';
+            var shortDesc = job.desc.substring(0, 300);
+            if (job.desc.length > 300) shortDesc += '...';
+            document.getElementById('step3JobDesc').textContent = shortDesc;
+            document.getElementById('step3JobInfo').style.display = 'block';
+
+            // 投递链接
+            var linkBox = document.getElementById('jdLinkBox');
+            var linkEl = document.getElementById('jdLink');
+            if (job.link) {
+                linkEl.href = job.link;
+                linkBox.style.display = 'block';
+            } else {
+                linkBox.style.display = 'none';
+            }
+
+            // 显示分析中状态，隐藏旧结果
+            document.getElementById('step3Analyzing').style.display = 'block';
+            var optEl = document.getElementById('optResult');
+            if (optEl) { optEl.innerHTML = ''; optEl.style.display = 'none'; }
+
+            // 自动触发分析
+            setTimeout(function() { analyzeResume(); }, 600);
+        }
+
+        // ===== PERSISTENCE =====
+        function saveProfile() {
+            syncProfile();
+            updateMajorField();
+            updateDirField();
+            const data = {
+                name: document.getElementById('profName').value,
+                majorCat: document.getElementById('profMajorCat').value,
+                majorSub: document.getElementById('profMajorSub').value,
+                majorCustom: document.getElementById('profMajorCustom') ? document.getElementById('profMajorCustom').value : '',
+                major: profile.major,
+                education: document.getElementById('profEdu').value,
+                school: document.getElementById('profSchool').value,
+                city: document.getElementById('profCity').value,
+                experience: document.getElementById('profExp').value,
+                skills: profile.skills,
+                hardwareSkills: profile.hardwareSkills,
+                dirCat: document.getElementById('profDirCat').value,
+                dirSub: document.getElementById('profDirSub') ? document.getElementById('profDirSub').value : '',
+                dirCustom: document.getElementById('profDirCustom') ? document.getElementById('profDirCustom').value : '',
+                jobDirection: profile.jobDirection,
+                portfolio: document.getElementById('profPortfolio').value,
+                projects: document.getElementById('profProjects').value
+            };
+            Object.assign(profile, data);
+            localStorage.setItem('artmatch_profile', JSON.stringify(data));
+            const saveEl = document.getElementById('saveStatus');
+            if (saveEl) saveEl.textContent = '已保存';
+            // Cloud sync
+            CloudAPI.saveProfile(data).then(r => {
+                if (r.ok) {
+                    const syncEl = document.getElementById('syncStatus');
+                    if (syncEl) { syncEl.textContent = '☁️ 已同步'; syncEl.style.color = 'var(--success)'; }
+                }
+            }).catch(() => {});
+        }
+
+        function loadProfile() {
+            try {
+                const data = JSON.parse(localStorage.getItem('artmatch_profile'));
+                if (!data) return;
+                applyProfile(data);
+            } catch(e) {}
+            // Try cloud load
+            CloudAPI.loadProfile().then(resp => {
+                if (resp.ok && resp.data.profile) {
+                    applyProfile(resp.data.profile);
+                }
+            }).catch(() => {});
+        }
+        
+        function applyProfile(data) {
+            Object.assign(profile, data);
+            document.getElementById('profName').value = data.name || '';
+            document.getElementById('profMajorCat').value = data.majorCat || '';
+            document.getElementById('profMajorSub').value = data.majorSub || '';
+            if (document.getElementById('profMajorCustom')) {
+                document.getElementById('profMajorCustom').value = data.majorCustom || '';
+            }
+            document.getElementById('profEdu').value = data.education || '';
+            document.getElementById('profSchool').value = data.school || '';
+            document.getElementById('profCity').value = data.city || '';
+            document.getElementById('profExp').value = data.experience || '';
+            // Direction fields
+            document.getElementById('profDirCat').value = data.dirCat || '';
+            document.getElementById('profPortfolio').value = data.portfolio || '';
+            document.getElementById('profProjects').value = data.projects || '';
+
+            // Trigger major cascade
+            if (data.majorCat) {
+                onMajorCatChange();
+                setTimeout(function() {
+                    document.getElementById('profMajorSub').value = data.majorSub || '';
+                    if (document.getElementById('profMajorCustom')) {
+                        document.getElementById('profMajorCustom').value = data.majorCustom || '';
+                    }
+                    profile.majorSub = data.majorSub || '';
+                    profile.majorCustom = data.majorCustom || '';
+                    profile.major = data.major || '';
+                }, 50);
+            }
+
+            // Trigger direction cascade
+            if (data.dirCat) {
+                onDirCatChange();
+                setTimeout(function() {
+                    if (data.dirCat !== '其他') {
+                        document.getElementById('profDirSub').value = data.dirSub || '';
+                    } else if (document.getElementById('profDirCustom')) {
+                        document.getElementById('profDirCustom').value = data.dirCustom || '';
+                    }
+                    profile.jobDirection = data.jobDirection || '';
+                }, 50);
+            }
+
+            // Restore tags
+            var skillBox = document.getElementById('skillBox');
+            var hwBox = document.getElementById('hwBox');
+            if (skillBox) skillBox.querySelectorAll('.tag').forEach(function(t) { t.remove(); });
+            if (hwBox) hwBox.querySelectorAll('.tag').forEach(function(t) { t.remove(); });
+            (data.skills||[]).forEach(function(s) { createTag(s, 'skillBox'); });
+            (data.hardwareSkills||[]).forEach(function(s) { createTag(s, 'hwBox'); });
+
+            const saveEl = document.getElementById('saveStatus');
+            if (saveEl) saveEl.textContent = '已加载';
+        }
+
+        function resetAll() {
+            ['profName','profMajorCat','profEdu','profSchool','profCity','profExp','profDir','profPortfolio','profProjects'].forEach(id => {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('profMajorSub').value = '';
+            var customEl = document.getElementById('profMajorCustom');
+            if (customEl) customEl.value = '';
+            // Reset cascade UI
+            document.getElementById('majorSubGroup').style.display = 'block';
+            document.getElementById('majorCustomGroup').style.display = 'none';
+            document.getElementById('skillBox').querySelectorAll('.tag').forEach(t => t.remove());
+            document.getElementById('hwBox').querySelectorAll('.tag').forEach(t => t.remove());
+            Object.keys(profile).forEach(k => {
+                profile[k] = Array.isArray(profile[k]) ? [] : '';
+            });
+            state.matchResults = [];
+            state.optResult = null;
+            document.getElementById('matchList').innerHTML = '';
+            document.getElementById('optResult').innerHTML = '';
+            document.getElementById('optResult').style.display = 'none';
+            localStorage.removeItem('artmatch_profile');
+            const saveEl = document.getElementById('saveStatus');
+            if (saveEl) saveEl.textContent = '已重置';
+            showToast('已重置所有信息', 'i');
+        }
+
+        // Auto-save on input change
+        function setupAutoSave() {
+            const ids = ['profName','profMajorCat','profMajorSub','profMajorCustom','profEdu','profSchool','profCity','profExp','profDir','profPortfolio','profProjects'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', saveProfile);
+                    el.addEventListener('input', function() { setTimeout(saveProfile, 500); });
+                }
+            });
+        }
+
+        // ===== TOAST =====
+        let toastTimer;
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast toast-' + type;
+            t.style.display = 'block';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2500);
+        }
+
+        // ===== RENDER ALL =====
+        // ===== ASYNC DATA LOADING =====
+        async function loadJobsData() {
+            try {
+                const resp = await fetch('jobs-data.json');
+                if (!resp.ok) { console.log('JSON not found, using inline jobs only'); return; }
+                const data = await resp.json();
+                state.externalJobs = data;
+                // Collect cities
+                data.forEach(j => { if (j.city) state.cities.add(j.city); });
+                populateCities();
+                document.getElementById('jobLibCount').textContent = (jobLibrary.length + data.length) >= 10000 ? '10000+' : ((jobLibrary.length + data.length) >= 9000 ? '9000+' : ((jobLibrary.length + data.length) >= 5000 ? '5000+' : (jobLibrary.length + data.length)));
+                console.log('Loaded ' + data.length + ' external jobs');
+            } catch (e) {
+                console.log('Failed to load external jobs:', e.message);
+            }
+        }
+
+        function populateCities() {
+            const sel = document.getElementById('searchCity');
+            const citiesArr = Array.from(state.cities).sort();
+            citiesArr.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                sel.appendChild(opt);
+            });
+            // Also add cities from inline jobs
+            jobLibrary.forEach(j => {
+                if (j.city && !state.cities.has(j.city)) {
+                    state.cities.add(j.city);
+                    const opt = document.createElement('option');
+                    opt.value = j.city;
+                    opt.textContent = j.city;
+                    sel.appendChild(opt);
+                }
+            });
+        }
+
+        function isProfileComplete() {
+            syncProfile();
+            return profile.majorCat && (profile.majorSub || profile.majorCustom) && profile.jobDirection;
+        }
+
+        function goToStep(n) {
+            // 严格顺序锁定
+            if (n === 2 && !isProfileComplete()) {
+                showToast('🔒 请先完成「录入背景」：专业大类、专业方向、求职方向为必填项', 'w');
+                return;
+            }
+            if (n === 3) {
+                if (!isProfileComplete()) {
+                    showToast('🔒 请先完成步骤一：录入背景信息', 'w');
+                    return;
+                }
+                if (!state.selectedJobId) {
+                    showToast('🔒 请在「智能匹配」中点击岗位卡片，选择岗位后再进入简历优化', 'w');
+                    return;
+                }
+            }
+            // 离开步骤3时清除岗位选择及旧的优化结果
+            if (n !== 3) {
+                state.selectedJobId = null;
+                state.selectedJobJd = '';
+                state.selectedJobTitle = '';
+                state.selectedJobCompany = '';
+                state.optResult = null;
+                var optEl = document.getElementById('optResult');
+                if (optEl) { optEl.innerHTML = ''; optEl.style.display = 'none'; }
+                var infoEl = document.getElementById('step3JobInfo');
+                if (infoEl) infoEl.style.display = 'none';
+                var aEl = document.getElementById('step3Analyzing');
+                if (aEl) aEl.style.display = 'none';
+                var lkBox = document.getElementById('jdLinkBox');
+                if (lkBox) lkBox.style.display = 'none';
+                var btnEl = document.getElementById('btnAnalyze');
+                if (btnEl) btnEl.style.display = 'none';
+            }
+            state.step = n;
+            renderAll();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+
+        function renderAll() {
+            var profileDone = isProfileComplete();
+            var matchedDone = state.matchResults.length > 0;
+            
+            var stepEls = [
+                document.querySelector('.step:nth-child(1)'),
+                document.getElementById('stepBtn2'),
+                document.getElementById('stepBtn3')
+            ];
+            for (var i = 1; i <= 3; i++) {
+                var stepEl = i === 1 ? stepEls[0] : stepEls[i-1];
+                var numEl = document.getElementById('stepNum' + i);
+                var lineEl = document.getElementById('stepLine' + i);
+                var hintEl = stepEl ? stepEl.querySelector('.step-locked-hint') : null;
+                
+                var isLocked = false;
+                if (i === 2 && !profileDone) isLocked = true;
+                if (i === 3 && (!matchedDone || !profileDone || !state.selectedJobId)) isLocked = true;
+                
+                if (stepEl) {
+                    stepEl.classList.remove('active', 'done', 'locked');
+                    if (i === state.step) stepEl.classList.add('active');
+                    if (i < state.step) stepEl.classList.add('done');
+                    if (isLocked) stepEl.classList.add('locked');
+                }
+                if (numEl) {
+                    if (isLocked) numEl.textContent = '\uD83D\uDD12';
+                    else numEl.textContent = i < state.step ? '\u2713' : String(i);
+                }
+                if (hintEl) {
+                    hintEl.style.display = isLocked ? 'block' : 'none';
+                    if (i === 2) hintEl.textContent = '完善背景后解锁';
+                    if (i === 3 && !matchedDone) hintEl.textContent = '完成智能匹配后解锁';
+                    if (i === 3 && !state.selectedJobId && matchedDone) hintEl.textContent = '点击岗位卡片后解锁';
+                }
+                if (lineEl) {
+                    lineEl.classList.toggle('done', i < state.step);
+                }
+            }
+
+            // Show/hide step panels
+            var p1 = document.getElementById('step1Panel');
+            var p2 = document.getElementById('step2Panel');
+            var p3 = document.getElementById('step3Panel');
+            if (p1) p1.style.display = state.step === 1 ? 'block' : 'none';
+            if (p2) p2.style.display = state.step === 2 ? 'block' : 'none';
+            if (p3) p3.style.display = state.step === 3 ? 'block' : 'none';
+        }
+
+        // ===== UPDATE TIME DISPLAY =====
+        // Scroll helpers
+        function scrollToStep() {
+            var el = document.getElementById('stepIndicator');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            goToStep(1);
+        }
+        function scrollToFeature() {
+            var el = document.getElementById('featureSection');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function updateTimeDisplay() {
+            var badge = document.getElementById('updateBadge');
+            var dailyEl = document.getElementById('dailyNewCount');
+            if (!badge) return;
+            var now = new Date();
+            var today3pm = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 0, 0);
+            if (now >= today3pm) {
+                badge.textContent = '✅ 今日岗位已更新';
+                if (dailyEl) dailyEl.textContent = '1,200+';
+            } else {
+                badge.textContent = '🕐 今日15:00更新';
+                if (dailyEl) dailyEl.textContent = '更新中...';
+            }
+        }
+
+        // ===== CLOUD INIT =====
+        function initCloud() {
+            const nickname = CloudAPI.getNickname() || '艺路求职者';
+            const nickEl = document.getElementById('userNickname');
+            if (nickEl) nickEl.textContent = nickname;
+            
+            CloudAPI.register(nickname).then(r => {
+                if (r) {
+                    const syncEl = document.getElementById('syncStatus');
+                    if (syncEl) { syncEl.textContent = '☁️ 在线'; syncEl.style.color = 'var(--success)'; }
+                    if (r.nickname) {
+                        CloudAPI.saveNickname(r.nickname);
+                        if (nickEl) nickEl.textContent = r.nickname;
+                    }
+                }
+            }).catch(() => {
+                const syncEl = document.getElementById('syncStatus');
+                if (syncEl) syncEl.textContent = '☁️ 离线';
+            });
+        }
+
+        // ===== INIT =====
+        function init() {
+            setupTagInput('skillInput', 'skillBox', profile.skills);
+            setupTagInput('hwInput', 'hwBox', profile.hardwareSkills);
+            setupAutoSave();
+            loadProfile();
+            updateTimeDisplay();
+            initCloud();
+            renderAll();
+            // Load external jobs async
+            loadJobsData().then(() => {
+                if (profile.major || profile.skills.length > 0) {
+                    refreshMatches();
+                }
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
