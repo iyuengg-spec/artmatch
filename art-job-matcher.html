@@ -768,9 +768,7 @@
                         </div>
                         <div class="f-group">
                             <label>期望城市</label>
-                            <select class="f-select" id="profCity">
-                                <option value="">请选择城市</option>
-                            </select>
+                            <input class="f-input" id="profCity" placeholder="请填写一个城市，如：北京、上海、重庆" autocomplete="off">
                         </div>
                     </div>
 
@@ -3006,21 +3004,8 @@
         }
 
         // ===== INIT =====
-        function populateCitySelect() {
-            const sel = document.getElementById('profCity');
-            if (!sel) return;
-            sel.innerHTML = '<option value="">请选择城市</option>';
-            CHINA_CITIES.forEach(city => {
-                const opt = document.createElement('option');
-                opt.value = city;
-                opt.textContent = city;
-                sel.appendChild(opt);
-            });
-        }
-
         function init() {
             setupAutoSave();
-            populateCitySelect();
             loadProfile();
             updateTimeDisplay();
             initCloud();
